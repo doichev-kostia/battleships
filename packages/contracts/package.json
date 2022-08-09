@@ -1,0 +1,14 @@
+{
+  "name": "@battleships/contracts",
+  "main": "src/index.ts",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "yarn@3.2.1",
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

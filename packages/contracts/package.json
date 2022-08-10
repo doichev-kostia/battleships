@@ -1,9 +1,12 @@
 {
   "name": "@battleships/contracts",
-  "main": "src/index.ts",
+  "main": "build/index.js",
   "private": true,
   "version": "0.0.1",
   "packageManager": "yarn@3.2.1",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2"

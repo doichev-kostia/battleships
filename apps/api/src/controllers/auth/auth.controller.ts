@@ -1,7 +1,7 @@
 import { JsonController, Post } from "routing-controllers";
 import { AuthHandler } from "./auth.handler";
 import { Body } from "@panenco/papi";
-import { LoginBody, UserBody } from "@battleships/contracts/src";
+import { LoginBody, RegisterBody } from "@battleships/contracts";
 
 @JsonController("/authentication")
 export class AuthController {
@@ -11,7 +11,7 @@ export class AuthController {
 	}
 
 	@Post("/register")
-	async register(@Body() body: UserBody) {
+	async register(@Body() body: RegisterBody) {
 		return AuthHandler.register(body);
 	}
 }

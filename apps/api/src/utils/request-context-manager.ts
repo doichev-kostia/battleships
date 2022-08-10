@@ -4,7 +4,7 @@ import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 export class RequestContextManager {
 	private static em: EntityManager<PostgreSqlDriver>;
 
-	public static getEM(): EntityManager<PostgreSqlDriver> {
+	public static getEm(): EntityManager<PostgreSqlDriver> {
 		return (
 			RequestContextManager.em ??
 			(RequestContext.getEntityManager() as EntityManager<PostgreSqlDriver>)
@@ -14,9 +14,9 @@ export class RequestContextManager {
 	/**
 	 * For testing purposes only.
 	 */
-	public static setEM(em: EntityManager<PostgreSqlDriver>) {
+	public static setEm(em: EntityManager<PostgreSqlDriver>) {
 		RequestContextManager.em = em;
 	}
 }
 
-export const { getEM } = RequestContextManager;
+export const { getEm } = RequestContextManager;

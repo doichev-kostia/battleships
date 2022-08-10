@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsString, Length } from "class-validator";
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
@@ -10,5 +10,6 @@ export class LoginBody {
 
 	@Expose()
 	@IsString()
+	@Length(8)
 	password: string;
 }

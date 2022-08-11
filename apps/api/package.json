@@ -11,7 +11,7 @@
     "clean:build": "yarn rimraf build",
     "clean:modules": "yarn rimraf node_modules",
     "watch": "tsc -w",
-    "test": "cross-env NODE_ENV=test NODE_PATH=./build mocha build/**/tests/**/*.test.js --exit",
+    "test": "cross-env NODE_ENV=test NODE_PATH=./build mocha -r source-map-support/register build/tests/**/*.test.js --exit",
     "migration:create": "yarn mikro-orm migration:create",
     "migration:up": "yarn mikro-orm migration:up"
   },
@@ -31,6 +31,7 @@
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-async-errors": "^3.1.1",
+    "rimraf": "^3.0.2",
     "routing-controllers": "^0.9.0",
     "routing-controllers-openapi": "^3.1.0",
     "source-map-support": "^0.5.21",

@@ -10,7 +10,7 @@ const initialValues = {
 	lastName: "",
 	email: "",
 	username: "",
-	phoneNumber: "",
+	phoneNumber: null,
 	password: "",
 };
 
@@ -41,7 +41,7 @@ const SignUpPage = () => {
 				Sign up
 			</Typography>
 			<form onSubmit={onSubmit}>
-				<div className="flex justify-between align-middle mb-3 gap-x-3">
+				<div className="flex justify-between items-center mb-3 gap-x-3">
 					<TextField
 						fullWidth
 						required
@@ -119,7 +119,7 @@ const SignUpPage = () => {
 					helperText={touched.password ? errors.password : ""}
 					className="mb-3"
 				/>
-				<div className="flex align-middle justify-center">
+				<div className="flex items-center justify-center">
 					<Button type="submit" variant="contained" disabled={isSubmitting}>
 						Submit
 					</Button>

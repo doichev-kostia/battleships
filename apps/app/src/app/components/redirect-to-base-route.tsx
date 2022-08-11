@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { paths } from "app/constants/paths";
-import { ROLE_TYPE } from "@battleships/contracts/src";
+import { ROLE_TYPE } from "@battleships/contracts";
 import { useTokenData } from "data";
 
 const roleBaseRoute = {

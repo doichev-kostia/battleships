@@ -1,19 +1,19 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "build/**"
-      ]
-    },
-    "lint": {
-      "outputs": []
-    },
-    "dev": {
-      "cache": false
-    }
-  }
+	"$schema": "https://turborepo.org/schema.json",
+	"pipeline": {
+		"build:clean": {
+			"dependsOn": ["^build:clean"]
+		},
+		"build": {
+			"dependsOn": [
+				"^build"
+			],
+			"outputs": [
+				"build/**"
+			]
+		},
+		"lint": {
+			"outputs": []
+		}
+	}
 }

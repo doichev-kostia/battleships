@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"typeRoots": ["src/definitions", "../../node_modules/@types"],
-		"target": "ES2019",
+		"target": "ESNext",
 		"module": "commonjs",
 		"moduleResolution": "Node",
 		"outDir": "./build",

@@ -5,6 +5,7 @@
   "packageManager": "yarn@3.2.1",
   "scripts": {
     "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && ./finalize-build.sh",
+    "watch": "tsc -p tsconfig.esm.json --watch && tsc -p tsconfig.cjs.json --watch",
     "build:clean": "yarn && yarn clean:build && yarn build",
     "clean:build": "yarn rimraf build/*"
   },

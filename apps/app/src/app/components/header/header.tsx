@@ -91,12 +91,12 @@ const Header = ({ pages, settings }: HeaderProps) => {
 							className="block md:hidden"
 						>
 							{pages.map(({ label, absolutePath }) => (
-								<MenuItem key={label} onClick={() => handleCloseNavMenu()}>
+								<MenuItem key={label} onClick={() => handleCloseNavMenu()} className="p-0">
 									<Typography
 										component={Link}
 										replace
 										to={absolutePath}
-										className="no-underline text-center text-inherit"
+										className="no-underline text-center text-inherit px-6 py-2"
 									>
 										{label}
 									</Typography>
@@ -152,12 +152,12 @@ const Header = ({ pages, settings }: HeaderProps) => {
 							onClose={handleCloseUserMenu}
 						>
 							{settings.map(({ label, absolutePath }) => (
-								<MenuItem key={label} onClick={handleCloseUserMenu}>
+								<MenuItem key={label} onClick={handleCloseUserMenu} className="p-0 grow">
 									<Typography
 										component={Link}
 										replace
 										to={absolutePath}
-										className="no-underline text-center text-inherit"
+										className="no-underline text-center text-inherit px-6 py-2"
 									>
 										{label}
 									</Typography>

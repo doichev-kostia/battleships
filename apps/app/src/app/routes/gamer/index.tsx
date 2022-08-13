@@ -6,11 +6,12 @@ import Layout from "app/components/layout/layout";
 
 const Header = React.lazy(() => import("app/components/header/header"));
 const DashboardPage = React.lazy(() => import("app/pages/gamer/dashboard"));
+const ProfilePage = React.lazy(() => import("app/pages/shared/profile"));
 
 const headerPages = [{ label: "Dashboard", absolutePath: gamerAbsolutePaths.dashboard }];
 const headerSettings = [
-	{ label: "Sign out", absolutePath: `/${paths.signOut}` },
 	{ label: "Profile", absolutePath: gamerAbsolutePaths.profile },
+	{ label: "Sign out", absolutePath: `/${paths.signOut}` },
 ];
 
 const GamerRouter = () => {
@@ -21,6 +22,17 @@ const GamerRouter = () => {
 			</Helmet>
 			<Routes>
 				<Route path={paths.dashboard} element={<DashboardPage />} />
+				<Route
+					path={paths.profile}
+					element={
+						<>
+							<Helmet>
+								<title>Battleships | Gamer | Profile</title>
+							</Helmet>
+							<ProfilePage />
+						</>
+					}
+				/>
 				<Route path="*" element={<Navigate replace to={gamerAbsolutePaths.dashboard} />} />
 			</Routes>
 		</Layout>

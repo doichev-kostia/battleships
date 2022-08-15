@@ -1,23 +1,36 @@
+import { AuthHelper } from "controllers/auth/auth.helper";
+import { createLoginTokens } from "utils/helpers/tokens/create-login-tokens";
 import { LoginBody, RegisterBody } from "@battleships/contracts";
 import { getEm, hashPassword } from "utils";
-import { Role, User } from "entities";
+import { BadRequest } from "@panenco/papi";
+
+import { Role } from "entities/role.entity";
+import { User } from "entities/user.entity";
 
 export class AuthHandler {
-	static async login(body: LoginBody) {}
+	public static login = async (body: LoginBody) => {
+		const { email, password } = body;
+		const user = await AuthHelper.checkPassword({ email }, password);
 
-	static async register(body: RegisterBody) {
+		return createLoginTokens(user);
+	};
+
+	public static register = async (body: RegisterBody) => {
 		const em = getEm();
 
-		if (await em.findOne(User, { email: body.email })) {
-			throw new Error("Email already exists");
+		const a = await em.findOne(User, { email: body.email });
+
+		if (a) {
+			throw new BadRequest("emailAlreadyExist", "Email already exists");
 		}
 
-		const userInput = { ...body, password: await hashPassword(body.password) };
+		const password = await hashPassword(body.password);
+		const userInput = { ...body, password };
+		const role = em.create(Role, {});
 		const user = em.create(User, userInput);
-		const role = em.create(Role, { user });
-		em.persist([user, role]);
+		role.user = user;
 
-		await em.flush();
-		return user;
-	}
+		await em.persistAndFlush([user, role]);
+		return await createLoginTokens(user);
+	};
 }

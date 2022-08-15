@@ -1,9 +1,12 @@
 import React from "react";
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, FormHelperText, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { validateForm } from "app/utils";
 import { LoginBody } from "@battleships/contracts";
 import { PublicLayout } from "app/components";
+import { useSignIn } from "data";
+import { Link, useNavigate } from "react-router-dom";
+import { paths } from "app/constants/paths";
 
 const initialValues = {
 	email: "",
@@ -13,8 +16,15 @@ const initialValues = {
 export type SignInPageValues = typeof initialValues;
 
 const SignInPage = () => {
+	const { mutate: signIn, error, isError } = useSignIn();
+	const navigate = useNavigate();
+
 	const handleSubmit = (values: SignInPageValues) => {
-		console.log({ values });
+		signIn(values, {
+			onSuccess: () => {
+				navigate("/");
+			},
+		});
 	};
 
 	const {
@@ -23,7 +33,6 @@ const SignInPage = () => {
 		handleBlur,
 		errors,
 		values,
-		isSubmitting,
 		touched,
 	} = useFormik({
 		initialValues,
@@ -36,7 +45,7 @@ const SignInPage = () => {
 			<Typography variant="h5" className="mb-3">
 				Sign In
 			</Typography>
-			<form onSubmit={onSubmit}>
+			<form onSubmit={onSubmit} className="mb-10">
 				<TextField
 					fullWidth
 					required
@@ -64,12 +73,23 @@ const SignInPage = () => {
 					helperText={touched.password ? errors.password : ""}
 					className="mb-3"
 				/>
+				<FormHelperText error={isError}>
+					{error?.response?.data ? error.response.data.message : ""}
+				</FormHelperText>
 				<div className="flex align-middle justify-center">
-					<Button type="submit" variant="contained" disabled={isSubmitting}>
+					<Button type="submit" variant="contained">
 						Submit
 					</Button>
 				</div>
 			</form>
+			<div>
+				<Typography className="text-center" variant="body2">
+					Don't have an account, yet?{" "}
+					<Link className="no-underline text-blue-400" to={`/${paths.signUp}`}>
+						Sign Up
+					</Link>
+				</Typography>
+			</div>
 		</PublicLayout>
 	);
 };

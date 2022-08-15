@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { paths } from "app/constants/paths";
 import { ROLE_TYPE } from "@battleships/contracts";
-// import { useTokenData } from "data";
+import { useTokenData } from "data";
 
 const roleBaseRoute = {
 	[ROLE_TYPE.GAMER]: paths.gamer,
@@ -10,12 +10,7 @@ const roleBaseRoute = {
 };
 
 const RedirectToBaseRoute = () => {
-	// const tokenData = useTokenData();
-	const tokenData = {
-		role: {
-			type: ROLE_TYPE.GAMER,
-		},
-	};
+	const tokenData = useTokenData();
 
 	const location = useLocation();
 

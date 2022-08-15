@@ -7,8 +7,13 @@ import Layout from "app/components/layout/layout";
 const Header = React.lazy(() => import("app/components/header/header"));
 const DashboardPage = React.lazy(() => import("app/pages/gamer/dashboard"));
 const ProfilePage = React.lazy(() => import("app/pages/shared/profile"));
+const GamePage = React.lazy(() => import("app/pages/gamer/game"));
+const ArchivePage = React.lazy(() => import("app/pages/gamer/archive"));
 
-const headerPages = [{ label: "Dashboard", absolutePath: gamerAbsolutePaths.dashboard }];
+const headerPages = [
+	{ label: "Dashboard", absolutePath: gamerAbsolutePaths.dashboard },
+	{ label: "Archive", absolutePath: gamerAbsolutePaths.archive },
+];
 const headerSettings = [
 	{ label: "Profile", absolutePath: gamerAbsolutePaths.profile },
 	{ label: "Sign out", absolutePath: `/${paths.signOut}` },
@@ -21,7 +26,17 @@ const GamerRouter = () => {
 				<title>Battleships | Gamer</title>
 			</Helmet>
 			<Routes>
-				<Route path={paths.dashboard} element={<DashboardPage />} />
+				<Route
+					path={paths.dashboard}
+					element={
+						<>
+							<Helmet>
+								<title>Battleships | Gamer | Dashboard</title>
+							</Helmet>
+							<DashboardPage />
+						</>
+					}
+				/>
 				<Route
 					path={paths.profile}
 					element={
@@ -30,6 +45,28 @@ const GamerRouter = () => {
 								<title>Battleships | Gamer | Profile</title>
 							</Helmet>
 							<ProfilePage />
+						</>
+					}
+				/>
+				<Route
+					path={`${paths.game}/:id`}
+					element={
+						<>
+							<Helmet>
+								<title>Battleships | Gamer | Game</title>
+							</Helmet>
+							<GamePage />
+						</>
+					}
+				/>
+				<Route
+					path={paths.archive}
+					element={
+						<>
+							<Helmet>
+								<title>Battleships | Gamer | Archive</title>
+							</Helmet>
+							<ArchivePage />
 						</>
 					}
 				/>

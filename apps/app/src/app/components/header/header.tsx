@@ -115,14 +115,14 @@ const Header = ({ pages, settings }: HeaderProps) => {
 						Battleships
 					</Typography>
 
-					<Box className="grow hidden md:flex">
+					<Box className="grow hidden md:flex ml-5 items-center">
 						{pages.map(({ label, absolutePath }) => (
 							<Typography
 								component={Link}
 								to={absolutePath}
 								key={label}
 								onClick={() => handleCloseNavMenu(absolutePath)}
-								className="my-0.5 text-white block no-underline"
+								className="my-0.5 text-white block no-underline mr-3"
 							>
 								{label}
 							</Typography>

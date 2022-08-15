@@ -1,13 +1,15 @@
 import React from "react";
 import { PublicLayout } from "app/components";
-import { Typography } from "@mui/material";
+import { FormHelperText, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { validateForm } from "app/utils";
-import { SignUpValidationSchema } from "data";
+import { SignUpValidationSchema, useSignUp } from "data";
 import { UserForm } from "app/components/user-form";
+import { Link } from "react-router-dom";
+import { paths } from "app/constants/paths";
 
 export type SignUpValues = {
-	[key in keyof SignUpValidationSchema]: string | null;
+	[key in keyof SignUpValidationSchema]: any;
 };
 
 const initialValues: SignUpValues = {
@@ -21,8 +23,10 @@ const initialValues: SignUpValues = {
 };
 
 const SignUpPage = () => {
+	const { mutate: signUp, error, isError } = useSignUp();
 	const handleSubmit = (values: SignUpValues) => {
-		console.log({ values });
+		const { confirmPassword: _, ...body } = values;
+		signUp(body);
 	};
 
 	const formikConfig = useFormik<SignUpValues>({
@@ -37,6 +41,17 @@ const SignUpPage = () => {
 				Sign up
 			</Typography>
 			<UserForm formikConfig={formikConfig} hasPassword />
+			<FormHelperText error={isError}>
+				{error?.response?.data ? error.response.data.message : ""}
+			</FormHelperText>
+			<div className="mt-10">
+				<Typography className="text-center" variant="body2">
+					Already have an account?{" "}
+					<Link className="no-underline text-blue-400" to={`/${paths.signIn}`}>
+						Sign In
+					</Link>
+				</Typography>
+			</div>
 		</PublicLayout>
 	);
 };

@@ -1,9 +1,9 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { paths } from "app/constants/paths";
-// import { useTokenData } from "data";
 import RedirectToBaseRoute from "app/utils/routing/redirect-to-base-route";
 import { ROLE_TYPE } from "@battleships/contracts";
+import { useTokenData } from "data";
 
 interface PrivateRouteProps {
 	children: React.ReactNode;
@@ -13,12 +13,7 @@ interface PrivateRouteProps {
 const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
 	const location = useLocation();
 
-	// const tokenData = useTokenData();
-	const tokenData = {
-		role: {
-			type: ROLE_TYPE.GAMER,
-		},
-	};
+	const tokenData = useTokenData();
 
 	if (!tokenData) {
 		return <Navigate to={`/${paths.signIn}`} state={{ from: location }} />;

@@ -15,8 +15,7 @@ export interface UserFormProps<Password extends boolean> {
 }
 
 export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserFormProps<P>) => {
-	const { handleSubmit, values, handleChange, handleBlur, errors, touched, isSubmitting } =
-		formikConfig;
+	const { handleSubmit, values, handleChange, handleBlur, errors, touched } = formikConfig;
 
 	return (
 		<form onSubmit={handleSubmit}>
@@ -31,7 +30,13 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 					id="firstName"
 					onChange={handleChange}
 					onBlur={handleBlur}
-					helperText={touched.firstName ? errors.firstName : ""}
+					helperText={touched.firstName ? errors.firstName : " "}
+					FormHelperTextProps={{
+						title: touched.firstName ? errors.firstName : " ",
+						classes: {
+							root: "whitespace-nowrap text-ellipsis overflow-hidden text-xs",
+						},
+					}}
 				/>
 				<TextField
 					fullWidth
@@ -43,7 +48,13 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 					id="lastName"
 					onChange={handleChange}
 					onBlur={handleBlur}
-					helperText={touched.lastName ? errors.lastName : ""}
+					helperText={touched.lastName ? errors.lastName : " "}
+					FormHelperTextProps={{
+						title: touched.firstName ? errors.firstName : " ",
+						classes: {
+							root: "whitespace-nowrap text-ellipsis overflow-hidden text-xs",
+						},
+					}}
 				/>
 			</div>
 			<TextField
@@ -56,7 +67,7 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 				id="email"
 				onChange={handleChange}
 				onBlur={handleBlur}
-				helperText={touched.email ? errors.email : ""}
+				helperText={touched.email ? errors.email : " "}
 				className="mb-3"
 			/>
 			<TextField
@@ -69,7 +80,7 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 				id="username"
 				onChange={handleChange}
 				onBlur={handleBlur}
-				helperText={touched.username ? errors.username : ""}
+				helperText={touched.username ? errors.username : " "}
 				className="mb-3"
 			/>
 			<TextField
@@ -81,7 +92,7 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 				id="phoneNumber"
 				onChange={handleChange}
 				onBlur={handleBlur}
-				helperText={touched.phoneNumber ? errors.phoneNumber : ""}
+				helperText={touched.phoneNumber ? errors.phoneNumber : " "}
 				className="mb-3"
 			/>
 			{hasPassword && (
@@ -103,14 +114,14 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 						helperText={
 							(touched as FormikTouched<SignUpValues>).password
 								? (errors as FormikErrors<SignUpValues>).password
-								: ""
+								: " "
 						}
 						className="mb-3"
 					/>
 					<TextField
 						fullWidth
 						required
-						type="confirmPassword"
+						type="password"
 						error={
 							!!(errors as FormikErrors<SignUpValues>).confirmPassword &&
 							(touched as FormikTouched<SignUpValues>).confirmPassword
@@ -124,14 +135,14 @@ export const UserForm = <P extends boolean>({ hasPassword, formikConfig }: UserF
 						helperText={
 							(touched as FormikTouched<SignUpValues>).confirmPassword
 								? (errors as FormikErrors<SignUpValues>).confirmPassword
-								: ""
+								: " "
 						}
 						className="mb-3"
 					/>
 				</>
 			)}
 			<div className="flex items-center justify-center">
-				<Button type="submit" variant="contained" disabled={isSubmitting}>
+				<Button type="submit" variant="contained">
 					{hasPassword ? "Sing up" : "Save"}
 				</Button>
 			</div>

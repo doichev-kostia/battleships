@@ -10,6 +10,8 @@ const FormContainer = styled(Paper)`
 	margin: 0 auto;
 	border-radius: 10px;
 	padding: 20px;
+	max-height: 70%;
+	overflow-y: auto;
 `;
 
 export const PublicLayout = ({ children }: PublicLayoutProps) => {

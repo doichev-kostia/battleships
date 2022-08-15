@@ -15,9 +15,13 @@
 		"tsBuildInfoFile": "./build/.cache/buildInfo.json",
 		"lib": ["es2019", "es6", "dom", "dom.iterable"],
 		"baseUrl": "src",
+		"paths": {
+			"*": ["./*"]
+		}
 	},
 	"exclude": [
-		"node_modules"
+		"node_modules",
+		"build",
 	],
 	"include": [
 		"src/**/*"

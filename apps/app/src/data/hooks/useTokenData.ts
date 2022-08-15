@@ -1,8 +1,9 @@
 import jwtDecode from "jwt-decode";
 import Cookies from "js-cookie";
-import { TokenData } from "data/types";
+import { AccessTokenData } from "data/types";
+import { AUTH_COOKIES_KEY } from "data/constants";
 
-export const useTokenData = (): TokenData | undefined => {
-	const token = Cookies.get("auth");
-	return token ? jwtDecode<TokenData>(token) : undefined;
+export const useTokenData = (): AccessTokenData | undefined => {
+	const token = Cookies.get(AUTH_COOKIES_KEY);
+	return token ? jwtDecode<AccessTokenData>(token) : undefined;
 };

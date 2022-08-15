@@ -1,12 +1,13 @@
-import { Token } from "./token.entity";
 import { Entity, ManyToOne } from "@mikro-orm/core";
-import { User } from "entities/user.entity";
 import { TOKEN_TYPE } from "@battleships/contracts";
+
+import { Token } from "./token.entity";
+import { User } from "../user.entity";
 
 @Entity({
 	discriminatorValue: TOKEN_TYPE.REFRESH,
 })
 export class RefreshToken extends Token {
-	@ManyToOne(() => User)
+	@ManyToOne("User")
 	public user: User;
 }

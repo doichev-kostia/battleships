@@ -1,5 +1,6 @@
-import { Base } from "utils/entities/base.entity";
 import { Collection, Entity, ManyToOne, OneToMany, Property } from "@mikro-orm/core";
+import { Base } from "utils/entities/base.entity";
+
 import { Role } from "./role.entity";
 import { Game } from "./game.entity";
 import { Shot } from "./shot.entity";
@@ -13,12 +14,12 @@ export class Player extends Base<Player> {
 	@Property()
 	public isWinner = false;
 
-	@ManyToOne(() => Game)
+	@ManyToOne("Game")
 	public game: Game;
 
-	@OneToMany(() => Shot, (shot) => shot.player)
+	@OneToMany("Shot", "player")
 	public shots = new Collection<Shot>(this);
 
-	@OneToMany(() => Ship, (ship) => ship.player)
+	@OneToMany("Ship", "player")
 	public ships = new Collection<Ship>(this);
 }

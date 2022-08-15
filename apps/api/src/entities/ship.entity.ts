@@ -4,7 +4,7 @@ import { Player } from "./player.entity";
 
 @Entity()
 export class Ship extends Base<Ship> {
-	@ManyToOne(() => Player)
+	@ManyToOne("Player")
 	public player: Player;
 
 	@Property()

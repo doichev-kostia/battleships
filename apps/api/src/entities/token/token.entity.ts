@@ -1,12 +1,13 @@
-import { Base } from "utils/entities/base.entity";
 import { Entity, Enum, Property } from "@mikro-orm/core";
 import { TOKEN_TYPE } from "@battleships/contracts";
 import * as crypto from "crypto";
 
+import { Base } from "utils/entities/base.entity";
+
 @Entity({ discriminatorColumn: "type", abstract: true })
 export abstract class Token extends Base<Token> {
 	@Property({ unique: true })
-	public readonly value: string;
+	public value: string;
 
 	@Property({ nullable: true, length: 3 })
 	public expiresAt?: Date;

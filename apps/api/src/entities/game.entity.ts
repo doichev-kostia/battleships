@@ -5,7 +5,7 @@ import { GAME_STATUS } from "@battleships/contracts";
 
 @Entity()
 export class Game extends Base<Game> {
-	@OneToMany(() => Player, (player) => player.game)
+	@OneToMany("Player", "game")
 	public players = new Collection<Player>(this);
 
 	@Enum(() => GAME_STATUS)

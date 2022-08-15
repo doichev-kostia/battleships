@@ -1,8 +1,9 @@
-import { Base } from "utils/entities/base.entity";
 import { Collection, Entity, OneToMany, Property } from "@mikro-orm/core";
-import { Role } from "entities/role.entity";
-import { RefreshToken } from "entities/token/refresh-token.entity";
-import { hashPassword } from "utils";
+import { Base } from "utils/entities/base.entity";
+import { hashPassword } from "utils/hash-password";
+
+import { Role } from "./role.entity";
+import { RefreshToken } from "./token/refresh-token.entity";
 
 @Entity()
 export class User extends Base<User> {
@@ -19,15 +20,15 @@ export class User extends Base<User> {
 	public username: string;
 
 	@Property()
-	public password?: string;
+	public password: string;
 
 	@Property({ nullable: true })
 	public phoneNumber?: string;
 
-	@OneToMany(() => Role, (role) => role.user)
+	@OneToMany("Role", "user")
 	public roles = new Collection<Role>(this);
 
-	@OneToMany(() => RefreshToken, (token) => token.user)
+	@OneToMany("RefreshToken", "user")
 	public refreshTokens = new Collection<RefreshToken>(this);
 
 	@Property({ persist: false })

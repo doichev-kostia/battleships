@@ -18,7 +18,7 @@ import { AuthController } from "controllers/auth/auth.controller";
 import dotenv from "dotenv";
 
 export class App {
-	public orm: MikroORM<PostgreSqlDriver> | undefined;
+	public orm: MikroORM<PostgreSqlDriver>;
 	public readonly host: Express;
 	public readonly port: number;
 
@@ -26,22 +26,17 @@ export class App {
 		dotenv.config();
 		this.port = Number(process.env.PORT) || 8000;
 		this.host = express();
-		this.host.use(express.json());
-		this.host.use((_, __, next: NextFunction) => {
-			if (this.orm) {
-				RequestContext.create(this.orm.em, next);
-			}
+		this.initializeMiddlewares();
+		this.initializeControllers([AuthController]);
+		this.host.use((req, res, next) => {
+			res.status(404).json({ error: "Endpoint not found" });
 			next();
 		});
+		this.initializeDocs();
+		this.initializeErrorHandling();
 	}
 
 	public listen() {
-		this.initializeControllers([AuthController]);
-		this.initializeDocs();
-		this.host.use((req, res, next) => {
-			res.status(404).json({ error: "Endpoint not found" });
-		});
-		this.host.use(errorMiddleware);
 		this.host.listen(this.port, () => {
 			console.info(`=================================`);
 			console.info(`======= ENV: ${process.env.NODE_ENV} ========`);
@@ -53,16 +48,26 @@ export class App {
 	public async createDBConnection() {
 		try {
 			this.orm = await MikroORM.init(ormConfig);
+			console.log("Database connection established");
 		} catch (error) {
 			console.error("An error has occurred while connecting to the DB", error);
 		}
+	}
+
+	private initializeMiddlewares() {
+		this.host.use(express.json());
+		this.host.use(express.urlencoded({ extended: true }));
+		this.host.use((req, __, next: NextFunction) => {
+			(req as any).em = this.orm.em.fork();
+			RequestContext.create(this.orm.em, next);
+		});
 	}
 
 	private initializeControllers(controllers: Function[]) {
 		useExpressServer(this.host, {
 			cors: {
 				origin: "*",
-				exposedHeaders: ["x-auth"],
+				exposedHeaders: ["x-auth", "x-refresh-token"],
 			},
 			controllers,
 			defaultErrorHandler: false,
@@ -105,5 +110,9 @@ export class App {
 		});
 
 		this.host.use("/docs", swaggerUi.serve, swaggerUi.setup(spec)); // Host swagger ui on /docs
+	}
+
+	private initializeErrorHandling() {
+		this.host.use(errorMiddleware);
 	}
 }

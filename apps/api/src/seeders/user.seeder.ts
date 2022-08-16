@@ -4,17 +4,18 @@ import { User } from "entities/user.entity";
 import { Builder } from "utils";
 import { createSimpleUUID } from "utils/helpers";
 import * as faker from "faker";
+import { createTestEmail, createTestPassword } from "tests/utils/constants";
 
 export class UserSeeder extends EntitySeeder<User> {
 	public seed = async (em: EntityManager) => {
 		this.entities = Builder.list(User, 10)
 			.with((x) => ({
 				id: createSimpleUUID(x),
-				email: `test-user+${x}@gmail.com`,
+				email: createTestEmail(x.toString()),
 				firstName: faker.name.firstName(),
 				lastName: faker.name.lastName(),
 				username: faker.internet.userName(),
-				password: `Password${x}`,
+				password: createTestPassword(x.toString()),
 			}))
 			.next(5)
 			.with({

@@ -339,6 +339,7 @@ __metadata:
     "@types/cors": ^2.8.12
     "@types/dotenv": ^8.2.0
     "@types/express": ^4.17.13
+    "@types/faker": ^6.6.9
     "@types/fs-extra": ^9.0.13
     "@types/mocha": ^9.1.1
     "@types/supertest": ^2.0.12
@@ -356,6 +357,7 @@ __metadata:
     dotenv: ^16.0.1
     express: ^4.18.1
     express-async-errors: ^3.1.1
+    faker: 5.5.3
     fs-extra: ^10.1.0
     hash-files: ^1.1.1
     mocha: ^9.1.3
@@ -1313,6 +1315,15 @@ __metadata:
     "@types/qs": "*"
     "@types/serve-static": "*"
   checksum: 12a2a0e6c4b993fc0854bec665906788aea0d8ee4392389d7a98a5de1eefdd33c9e1e40a91f3afd274011119c506f7b4126acb97fae62ae20b654974d44cba12
+  languageName: node
+  linkType: hard
+
+"@types/faker@npm:^6.6.9":
+  version: 6.6.9
+  resolution: "@types/faker@npm:6.6.9"
+  dependencies:
+    faker: "*"
+  checksum: 8fb069b6f2bf2cefec42a214395f49695b881d70e651a215a61c2fa7494bb173d1a598c895882ff89df3702ab51c49c23433b3d4bcfd8323cf4f608ed9fb6ce8
   languageName: node
   linkType: hard
 
@@ -3693,6 +3704,20 @@ __metadata:
     utils-merge: 1.0.1
     vary: ~1.1.2
   checksum: c3d44c92e48226ef32ec978becfedb0ecf0ca21316bfd33674b3c5d20459840584f2325726a4f17f33d9c99f769636f728982d1c5433a5b6fe6eb95b8cf0c854
+  languageName: node
+  linkType: hard
+
+"faker@npm:*":
+  version: 6.6.6
+  resolution: "faker@npm:6.6.6"
+  checksum: bfb0d581ab4d76095f2c6bff213fe1735ce077f0f8df849c144ad26035e105bce1b7a704cc030366338c52e25b636ac097a712426a78c9b8804af78f6f2bffe7
+  languageName: node
+  linkType: hard
+
+"faker@npm:5.5.3":
+  version: 5.5.3
+  resolution: "faker@npm:5.5.3"
+  checksum: 684fd64c8d3897e54248f95b4f6319f75d97691b8500cd13adf4af2c28f9204f766c1d1aaa6b41338f0beaaa87256c3132f8708a1a8f189d122b92f6b98081c3
   languageName: node
   linkType: hard
 

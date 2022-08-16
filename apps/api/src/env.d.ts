@@ -10,6 +10,7 @@ declare global {
 			DATABASE_URL: string;
 			POSTGRES_CONTAINER: string;
 			POSTGRES_USER: string;
+			POSTGRES_PASSWORD: string;
 			POSTGRES_DB: string;
 			SHOULD_DUMP: string;
 			PAPI_VERBOSE: "none" | string;

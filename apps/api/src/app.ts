@@ -16,9 +16,6 @@ import { routingControllersToSpec } from "routing-controllers-openapi";
 import * as swaggerUi from "swagger-ui-express";
 import { AuthController } from "controllers/auth/auth.controller";
 import dotenv from "dotenv";
-import { DatabaseSeeder } from "utils/seeder/seeder";
-
-console.log({ seeder: new DatabaseSeeder({} as MikroORM<PostgreSqlDriver>) } as any);
 
 export class App {
 	public orm: MikroORM<PostgreSqlDriver>;

@@ -6,6 +6,8 @@ import { pumpAndDump } from "utils/seeder/pumpAndDump/pumpAndDump";
 import { getEm } from "utils/request-context-manager";
 import { execAsync } from "utils/seeder/pumpAndDump/execAsync";
 
+const DROP_SCHEMAS_COMMAND = "DROP SCHEMA public CASCADE; CREATE SCHEMA public;";
+
 let fileHash = "";
 
 const generateHash = async () => {
@@ -63,7 +65,7 @@ export const dropAndLoad = async (orm: MikroORM<PostgreSqlDriver>, isForced = fa
 		console.log("Not regenerating fixtures because no changes detected");
 	}
 
-	await orm.em.execute(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`);
+	await orm.em.execute(DROP_SCHEMAS_COMMAND);
 	const loadCommand = process.env.DATABASE_URL
 		? `psql ${process.env.DATABASE_URL} < ${hashedDumpFile}`
 		: `docker exec -i ${process.env.POSTGRES_CONTAINER} psql -U ${process.env.POSTGRES_USER} -d ${process.env.POSTGRES_DB} < ${hashedDumpFile}`;

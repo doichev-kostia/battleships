@@ -25,7 +25,7 @@ export class User extends Base<User> {
 	@Property({ nullable: true })
 	public phoneNumber?: string;
 
-	@OneToMany("Role", "user")
+	@OneToMany(() => Role, (role) => role.user)
 	public roles = new Collection<Role>(this);
 
 	@OneToMany("RefreshToken", "user")

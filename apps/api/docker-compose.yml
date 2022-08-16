@@ -1,6 +1,7 @@
 version: '3'
 services:
   postgres:
+    container_name: battleships-postgres
     image: postgres:latest
     ports:
       - '5432:5432'
@@ -8,3 +9,13 @@ services:
       - ./data/postgres:/data/battleships-postgres
     env_file:
       - docker.env
+
+  postgres-test:
+    container_name: battleships-postgres-test
+    image: postgres:latest
+    ports:
+      - '5433:5432'
+    volumes:
+        - ./data/postgres:/data/battleships-postgres
+    env_file:
+      - docker.test.env

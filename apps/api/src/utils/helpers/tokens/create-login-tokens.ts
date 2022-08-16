@@ -1,6 +1,6 @@
 import { AccessTokenData, TOKEN_TYPE } from "@battleships/contracts";
 import { getEm } from "utils/request-context-manager";
-import { createSimpleAccessToken } from "utils/helpers/tokens/createSimpleAccessToken";
+import { createSimpleAccessToken } from "utils/helpers/tokens/create-simple-access-token";
 
 import { RefreshToken } from "entities/token/refresh-token.entity";
 import { User } from "entities/user.entity";
@@ -12,12 +12,12 @@ export const createLoginTokens = async (user: User) => {
 	/**
 	 * @todo: update for admin role
 	 */
-	const roles = user.roles.getItems();
+	const role = user.roles[0];
 	const accessTokenData: AccessTokenData = {
 		userId: user.id,
 		role: {
-			id: roles[0].id,
-			type: roles[0].type,
+			id: role.id,
+			type: role.type,
 		},
 		type: TOKEN_TYPE.ACCESS,
 	};

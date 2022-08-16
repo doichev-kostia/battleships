@@ -26,11 +26,12 @@ export class AuthHandler {
 
 		const password = await hashPassword(body.password);
 		const userInput = { ...body, password };
-		const role = em.create(Role, {});
 		const user = em.create(User, userInput);
-		role.user = user;
-
-		await em.persistAndFlush([user, role]);
+		em.persist(user);
+		const role = em.create(Role, { user });
+		em.persist(role);
+		user.roles.add(role);
+		await em.flush();
 		return await createLoginTokens(user);
 	};
 }

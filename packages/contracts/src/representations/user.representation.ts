@@ -19,6 +19,10 @@ export class UserRepresentation {
 	public lastName: string;
 
 	@Expose()
+	@IsString()
+	public username: string;
+
+	@Expose()
 	@IsEmail()
 	public email: string;
 

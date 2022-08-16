@@ -10,12 +10,12 @@ import {
 	RoutingControllersOptions,
 	useExpressServer,
 } from "routing-controllers";
-import { errorMiddleware, getAuthenticator } from "@panenco/papi";
+import { errorMiddleware, getAuthenticator, importClasses } from "@panenco/papi";
 import { validationMetadatasToSchemas } from "class-validator-jsonschema";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import * as swaggerUi from "swagger-ui-express";
-import { AuthController } from "controllers/auth/auth.controller";
 import dotenv from "dotenv";
+import { paths } from "paths";
 
 export class App {
 	public orm: MikroORM<PostgreSqlDriver>;
@@ -27,7 +27,8 @@ export class App {
 		this.port = Number(process.env.PORT) || 8000;
 		this.host = express();
 		this.initializeMiddlewares();
-		this.initializeControllers([AuthController]);
+		const controllers = importClasses([`${paths.root}/**/*.controller.js`]);
+		this.initializeControllers(controllers);
 		this.host.use((req, res, next) => {
 			res.status(404).json({ error: "Endpoint not found" });
 			next();

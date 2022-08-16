@@ -6,7 +6,7 @@ import { TokenBody } from "@battleships/contracts";
 import { TokenHandler } from "controllers/token/token.handler";
 
 @JsonController("/tokens")
-class TokenController {
+export class TokenController {
 	@Post("/refresh")
 	@OpenAPI({ summary: "Refresh the access token" })
 	async refresh(@Body() body: TokenBody, @Req() request: Request, @Res() response: Response) {

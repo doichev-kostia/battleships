@@ -5,7 +5,7 @@
 	"main": "build/server.js",
 	"scripts": {
 		"start": "cross-env NODE_PATH=./build node -r source-map-support/register build/server.js",
-		"dev": "cross-env NODE_PATH=./build nodemon -r source-map-support/register ./build/server.js",
+		"dev": "cross-env NODE_ENV=development NODE_PATH=./build nodemon -r source-map-support/register ./build/server.js",
 		"build": "tsc",
 		"build:clean": "yarn && yarn clean:build && yarn build",
 		"clean:build": "yarn rimraf build",
@@ -13,7 +13,8 @@
 		"watch": "tsc -w",
 		"test": "cross-env NODE_ENV=test NODE_PATH=./build mocha -r source-map-support/register build/tests/**/*.test.js --exit",
 		"migration:migrate": "yarn mikro-orm migration:create && yarn mikro-orm migration:up",
-		"load-fixtures:test": "cross-env NODE_ENV=test NODE_PATH=./build node build/scripts/load-fixtures.js"
+		"load-fixtures:test": "cross-env NODE_ENV=test NODE_PATH=./build node build/scripts/load-fixtures.js",
+		"load-fixtures:app": "cross-env NODE_ENV=development NODE_PATH=./build node build/scripts/load-fixtures.js"
 	},
 	"dependencies": {
 		"@battleships/contracts": "workspace:^",

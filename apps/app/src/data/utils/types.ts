@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+
 export type APIError<Errors = unknown> = {
 	message: string;
 	reason: string;
@@ -7,3 +9,7 @@ export type APIError<Errors = unknown> = {
 export type APIValidationError<T extends object> = APIError<{
 	[K in keyof T]?: string | object | string[];
 }>;
+
+export type AxiosAPIError<Entity extends object> = AxiosError<
+	APIError | APIValidationError<Entity>
+>;

@@ -4,6 +4,7 @@ import jwtDecode from "jwt-decode";
 import { HTTP_REQUEST_METHOD, STATUS_CODE } from "@battleships/contracts";
 import { AUTH_COOKIES_KEY } from "data/constants";
 import { AccessTokenData, AuthCookie } from "data/types";
+import { refreshAccessToken } from "data/api/token";
 
 class HttpClient {
 	private readonly axios: AxiosInstance;
@@ -33,11 +34,11 @@ class HttpClient {
 		const { auth, refresh } = JSON.parse(Cookies.get(AUTH_COOKIES_KEY) ?? "{}") as AuthCookie;
 
 		if (typeof auth === "string" && auth) {
-			const { exp, roles, userId } = jwtDecode<AccessTokenData>(auth);
+			const { exp, role, userId } = jwtDecode<AccessTokenData>(auth);
 			const hasTokenExpired = new Date().getTime() / 1000 > Number(exp) - 5;
-			if (hasTokenExpired && !HttpClient.isRefreshUrl(configCopy.url || "")) {
-				// refreshSession
 
+			if (hasTokenExpired && !HttpClient.isRefreshUrl(configCopy.url || "")) {
+				refreshAccessToken({ userId, roleType: role.type });
 				return {
 					...configCopy,
 					cancelToken: new axios.CancelToken((cancel) =>
@@ -47,6 +48,7 @@ class HttpClient {
 			}
 			if (!hasTokenExpired && configCopy.headers) {
 				configCopy.headers["x-auth"] = auth;
+				configCopy.headers["x-refresh-token"] = refresh;
 			}
 		}
 
@@ -86,7 +88,7 @@ class HttpClient {
 			const { auth } = JSON.parse(Cookies.get(AUTH_COOKIES_KEY) ?? "{}") as AuthCookie;
 
 			if (typeof auth === "string" && auth) {
-				const { roles, userId } = jwtDecode<AccessTokenData>(auth);
+				const { role, userId } = jwtDecode<AccessTokenData>(auth);
 
 				// in case the refresh token is expired or invalid, we need to logout the user
 				if (
@@ -94,10 +96,12 @@ class HttpClient {
 						response?.status === STATUS_CODE.NOT_FOUND) &&
 					HttpClient.isRefreshUrl(response?.config.url || "")
 				) {
-					// logout
+					Cookies.remove(AUTH_COOKIES_KEY, { path: "/" });
+					window.location.href = "/";
+
 					// in case the access token is expired, we need to refresh the session
 				} else if (response?.status === STATUS_CODE.UNAUTHORIZED) {
-					// refetch the session
+					refreshAccessToken({ userId, roleType: role.type });
 				}
 			}
 		}

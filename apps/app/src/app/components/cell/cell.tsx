@@ -6,9 +6,20 @@ export interface CellProps extends React.HTMLAttributes<HTMLDivElement> {
 		x: number;
 		y: number;
 	};
+	isShip?: boolean;
 }
 
-export const Cell = ({ coordinates, className, ...rest }: CellProps) => {
+export const Cell = ({ coordinates, className, isShip, ...rest }: CellProps) => {
+	// const [, drop] = useDrop(
+	// 	() => ({
+	// 		accept: ITEM_TYPE.SHIP,
+	// 		drop: () => (x, y),
+	// 		collect: (monitor) => ({
+	// 			isOver: monitor.isOver()
+	// 		}
+	// 	}),
+	// 	[coordinates],
+	// );
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		console.log(`x: ${coordinates.x}, y: ${coordinates.y}`);
 	};
@@ -20,7 +31,7 @@ export const Cell = ({ coordinates, className, ...rest }: CellProps) => {
 			className={cx(className, "w-10 h-10 border border-solid cursor-pointer")}
 			{...rest}
 		>
-			{`x: ${coordinates.x}, y: ${coordinates.y}`}
+			{/*{isShip && <Ship />}*/}
 		</div>
 	);
 };

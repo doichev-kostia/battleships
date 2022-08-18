@@ -5,7 +5,7 @@ import { useFormik } from "formik";
 import { validateForm } from "app/utils";
 import { SignUpValidationSchema, useSignUp } from "data";
 import { UserForm } from "app/components/user-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { paths } from "app/constants/paths";
 
 export type SignUpValues = {
@@ -24,9 +24,16 @@ const initialValues: SignUpValues = {
 
 const SignUpPage = () => {
 	const { mutate: signUp, error, isError } = useSignUp();
+
+	const navigate = useNavigate();
+
 	const handleSubmit = (values: SignUpValues) => {
 		const { confirmPassword: _, ...body } = values;
-		signUp(body);
+		signUp(body, {
+			onSuccess: () => {
+				navigate("/");
+			},
+		});
 	};
 
 	const formikConfig = useFormik<SignUpValues>({

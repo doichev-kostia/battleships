@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { paths } from "app/constants/paths";
 
 const initialValues = {
-	email: "",
+	login: "",
 	password: "",
 };
 
@@ -49,14 +49,14 @@ const SignInPage = () => {
 				<TextField
 					fullWidth
 					required
-					name="email"
-					value={values.email}
-					error={!!errors.email && touched.email}
-					label="Email"
-					id="email"
+					name="login"
+					value={values.login}
+					error={!!errors.login && touched.login}
+					label="login"
+					id="login"
 					onChange={handleChange}
 					onBlur={handleBlur}
-					helperText={touched.email ? errors.email : ""}
+					helperText={touched.login ? errors.login : ""}
 					className="mb-3"
 				/>
 				<TextField

@@ -13,7 +13,7 @@ export class Grid {
 		for (let row = 0; row < size; row++) {
 			this.grid[row] = [];
 			for (let col = 0; col < size; col++) {
-				this.grid[row][col] = new Cell(row, col);
+				this.grid[row][col] = new Cell(col, row);
 			}
 		}
 	}

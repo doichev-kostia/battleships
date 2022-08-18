@@ -10,6 +10,8 @@ import { theme } from "ui";
 import { Loader } from "app/components/loader";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const rootElement = document.getElementById("root") || document.body;
 // Create a client
@@ -22,7 +24,9 @@ const Main = () => {
 				<ThemeProvider theme={theme}>
 					<StyledEngineProvider injectFirst>
 						<Suspense fallback={<Loader />}>
-							<Router />
+							<DndProvider backend={HTML5Backend}>
+								<Router />
+							</DndProvider>
 						</Suspense>
 					</StyledEngineProvider>
 				</ThemeProvider>

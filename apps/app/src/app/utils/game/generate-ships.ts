@@ -14,8 +14,9 @@ type Position = {
 		y: number;
 	};
 };
-
+let counter = 0;
 const generatePosition = () => {
+	console.log({ counter: ++counter });
 	const isHorizontal = Math.random() > 0.5;
 	const coordinates = {
 		x: Math.floor(Math.random() * (GAME_CONFIG.size - 1)),
@@ -30,16 +31,83 @@ const generatePosition = () => {
 const isValidPosition = (grid: Cell[][], position: Position, shipSize: number) => {
 	const { isHorizontal, coordinates } = position;
 	const { x, y } = coordinates;
-	const isValid = isHorizontal
-		? x + shipSize <= GAME_CONFIG.size
-		: y + shipSize <= GAME_CONFIG.size;
-	if (!isValid) {
+	const isInGridRange = isHorizontal
+		? x + shipSize <= GAME_CONFIG.size - 1
+		: y + shipSize <= GAME_CONFIG.size - 1;
+
+	if (!isInGridRange) {
 		return false;
 	}
-	for (let i = 0; i < shipSize; i++) {
-		const cell = isHorizontal ? grid[x + i][y] : grid[x][y + i];
-		if (cell.getHasShip()) {
-			return false;
+
+	/* Check whether there is a ship in the current position and the neighbouring cells*/
+	for (let i = 0; i < shipSize + 1; i++) {
+		if (isHorizontal) {
+			const currentRow = grid[y];
+			const prevRow = grid[y - 1];
+			const nextRow = grid[y + 1];
+			if (currentRow[x + i] && currentRow[x + i].getHasShip()) {
+				return false;
+			}
+			if (prevRow) {
+				if (prevRow[x + i] && prevRow[x + i].getHasShip()) {
+					return false;
+				}
+			}
+
+			if (nextRow) {
+				if (nextRow[x + i] && nextRow[x + i].getHasShip()) {
+					return false;
+				}
+			}
+
+			if (i === 0) {
+				if (currentRow[x - 1] && currentRow[x - 1].getHasShip()) {
+					return false;
+				}
+
+				if (prevRow) {
+					if (prevRow[x - 1] && prevRow[x - 1].getHasShip()) {
+						return false;
+					}
+				}
+
+				if (nextRow) {
+					if (nextRow[x - 1] && nextRow[x - 1].getHasShip()) {
+						return false;
+					}
+				}
+			}
+		}
+		if (!isHorizontal) {
+			if (i === 0) {
+				const prevRow = grid[y - 1];
+				if (prevRow) {
+					if (prevRow[x].getHasShip()) {
+						return false;
+					}
+
+					if (prevRow[x - 1] && prevRow[x - 1].getHasShip()) {
+						return false;
+					}
+
+					if (prevRow[x + 1] && prevRow[x + 1].getHasShip()) {
+						return false;
+					}
+				}
+			}
+
+			const currentRow = grid[y + i];
+			if (currentRow[x] && currentRow[x].getHasShip()) {
+				return false;
+			}
+
+			if (currentRow[x - 1] && currentRow[x - 1].getHasShip()) {
+				return false;
+			}
+
+			if (currentRow[x + 1] && currentRow[x + 1].getHasShip()) {
+				return false;
+			}
 		}
 	}
 	return true;
@@ -52,6 +120,7 @@ export const generateShips = (grid: Grid) => {
 	 * Sort from largest to smallest
 	 */
 	ships = ships.sort((a, b) => b.size - a.size);
+
 	const allShips = ships.reduce<Ship[]>((acc, ship) => {
 		const total: Ship[] = [];
 		for (let i = 0; i < ship.quantity; i++) {
@@ -66,6 +135,10 @@ export const generateShips = (grid: Grid) => {
 		let position: Position;
 		do {
 			position = generatePosition();
+			if (counter > 5000) {
+				break;
+				return;
+			}
 		} while (!isValidPosition(gridCells, position, shipLength));
 
 		const { isHorizontal, coordinates } = position;
@@ -79,9 +152,8 @@ export const generateShips = (grid: Grid) => {
 				shipCells.push({ x, y: y + i });
 			}
 		}
-
 		shipCells.forEach(({ x, y }) => {
-			gridCells[x][y].setHasShip(true);
+			gridCells[y][x].setHasShip(true);
 		});
 	});
 	return gridCells;

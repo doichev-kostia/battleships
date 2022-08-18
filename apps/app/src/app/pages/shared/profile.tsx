@@ -1,18 +1,13 @@
 import React from "react";
 import { useFormik } from "formik";
-import { UserBody } from "@battleships/contracts";
+import { UserBody, UserRepresentation } from "@battleships/contracts";
 import { plainToInstance } from "class-transformer";
 import Typography from "@mui/material/Typography";
 import { UserForm } from "app/components/user-form";
 import { styled } from "@mui/material";
-
-const initialValues = plainToInstance(UserBody, {
-	firstName: "Kostiantyn",
-	lastName: "Doichev",
-	email: "kostia.doichev@gmail.com",
-	username: "doichev-kostia",
-	phoneNumber: undefined,
-});
+import { useFetchUser, useTokenData } from "data";
+import { Loader } from "app/components/loader";
+import _ from "lodash";
 
 const FormWrapper = styled("div")`
 	max-width: 600px;
@@ -20,21 +15,35 @@ const FormWrapper = styled("div")`
 	margin-top: 20px;
 `;
 
+const initializeDefaultValues = (data?: UserRepresentation) => {
+	if (!data) return {} as UserBody;
+	const values = _.pick(data, ["firstName", "lastName", "email", "username", "phoneNumber"]);
+	return plainToInstance(UserBody, values);
+};
+
 const ProfilePage = () => {
+	const tokenData = useTokenData();
+	const userId = tokenData?.userId;
+
+	const { data, isLoading } = useFetchUser(userId || "", {
+		enabled: !!userId,
+	});
+
 	const handleSubmit = (values: UserBody) => {
 		console.log({ values });
 	};
 
 	const formikConfig = useFormik({
 		onSubmit: handleSubmit,
-		initialValues,
+		initialValues: initializeDefaultValues(data),
 	});
+
 	return (
 		<FormWrapper>
 			<Typography variant="h5" className="mb-10">
 				Profile
 			</Typography>
-			<UserForm formikConfig={formikConfig} hasPassword={false} />
+			{!isLoading ? <UserForm formikConfig={formikConfig} hasPassword={false} /> : <Loader />}
 		</FormWrapper>
 	);
 };

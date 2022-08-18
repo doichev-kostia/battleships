@@ -2,6 +2,10 @@ export interface Ship {
 	size: number;
 }
 
+export enum ITEM_TYPE {
+	SHIP = "SHIP",
+}
+
 export const SHIPS = new Map<number, string>([
 	[5, "Carrier"],
 	[4, "Battleship"],

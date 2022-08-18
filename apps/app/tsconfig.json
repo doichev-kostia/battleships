@@ -26,7 +26,8 @@
 		"baseUrl": "./src"
 	},
 	"include": [
-		"src"
+		"src",
+		"declaration.d.ts"
 	],
 	"references": [
 		{

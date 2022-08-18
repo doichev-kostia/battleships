@@ -30,9 +30,9 @@ describe("Handler test", () => {
 		});
 
 		it("should log in as a user", async () => {
-			const creds = createTestCredentials("0");
-			const { user } = await AuthHandler.login(creds);
-			expect(user.email).to.equal(creds.email);
+			const { email, password } = createTestCredentials("0");
+			const { user } = await AuthHandler.login({ login: email, password });
+			expect(user.email).to.equal(email);
 		});
 
 		after(() => base.after());

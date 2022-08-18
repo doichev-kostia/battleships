@@ -9,8 +9,20 @@ import { User } from "entities/user.entity";
 
 export class AuthHandler {
 	public static login = async (body: LoginBody) => {
-		const { email, password } = body;
-		const user = await AuthHelper.checkPassword({ email }, password);
+		const { login, password } = body;
+		const user = await AuthHelper.checkPassword(
+			{
+				$or: [
+					{
+						email: login,
+					},
+					{
+						username: login,
+					},
+				],
+			},
+			password,
+		);
 
 		return createLoginTokens(user);
 	};
@@ -18,10 +30,22 @@ export class AuthHandler {
 	public static register = async (body: RegisterBody) => {
 		const em = getEm();
 
-		const a = await em.findOne(User, { email: body.email });
+		const a = await em.findOne(User, {
+			$or: [
+				{
+					email: body.email,
+				},
+				{
+					username: body.username,
+				},
+			],
+		});
 
 		if (a) {
-			throw new BadRequest("emailAlreadyExist", "Email already exists");
+			const { reason, message } = AuthHandler.getProperErrorMessage(
+				a.email === body.email ? "email" : "username",
+			);
+			throw new BadRequest(reason, message);
 		}
 
 		const password = await hashPassword(body.password);
@@ -34,4 +58,12 @@ export class AuthHandler {
 		await em.flush();
 		return await createLoginTokens(user);
 	};
+
+	private static getProperErrorMessage(reason: "email" | "username") {
+		const isEmail = reason === "email";
+		return {
+			reason: isEmail ? "emailAlreadyExist" : "usernameAlreadyExist",
+			message: isEmail ? "Email already exists" : "Username already exists",
+		};
+	}
 }

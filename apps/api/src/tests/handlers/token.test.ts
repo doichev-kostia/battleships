@@ -17,8 +17,8 @@ describe("Handler test", () => {
 		});
 
 		it("should refresh the token", async () => {
-			const creds = createTestCredentials("0");
-			const { user, refreshToken } = await AuthHandler.login(creds);
+			const { email, password } = createTestCredentials("0");
+			const { user, refreshToken } = await AuthHandler.login({ login: email, password });
 
 			expect(refreshToken.value).to.be.a("string");
 

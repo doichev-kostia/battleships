@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Container, Grid as MuiGrid, List, ListItem, Typography } from "@mui/material";
 import { Grid } from "app/utils/game/grid";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,9 @@ import { gameKeys } from "data/queryKeys";
 
 const DashboardPage = () => {
 	const { socket } = useContext(SocketContext);
-	const grid = useRef<Grid>(new Grid());
+	const [grid] = useState(new Grid());
+	const [randomizeCounter, setRandomizeCounter] = useState(0);
+	const [isRandomDisabled, setIsRandomDisabled] = useState(false);
 
 	const navigate = useNavigate();
 	const tokenData = useTokenData();
@@ -47,7 +49,7 @@ const DashboardPage = () => {
 			queryClient.invalidateQueries(gameKeys.available);
 		});
 
-		grid.current.generateShips();
+		grid.generateShips();
 	}, []);
 
 	const handlePlay = () => {
@@ -57,7 +59,7 @@ const DashboardPage = () => {
 					gameId: id,
 					body: {
 						userId: tokenData.userId,
-						ships: grid.current.getShips().map((ship) => ship.getCoordinates()),
+						ships: grid.getShips().map((ship) => ship.getCoordinates()),
 					},
 				};
 				joinGame(body, {
@@ -77,7 +79,7 @@ const DashboardPage = () => {
 			gameId,
 			body: {
 				userId: tokenData.userId,
-				ships: grid.current.getShips().map((ship) => ship.getCoordinates()),
+				ships: grid.getShips().map((ship) => ship.getCoordinates()),
 			},
 		};
 		joinGame(body, {
@@ -87,6 +89,18 @@ const DashboardPage = () => {
 				navigate(path, { replace: true });
 			},
 		});
+	};
+
+	const handleRandomize = () => {
+		grid.generateShips();
+
+		setRandomizeCounter((prevState) => prevState + 1);
+		setIsRandomDisabled(() => {
+			return true;
+		});
+		setTimeout(() => {
+			setIsRandomDisabled(false);
+		}, 1500);
 	};
 
 	return (
@@ -130,7 +144,12 @@ const DashboardPage = () => {
 						Prepare your grid
 					</Typography>
 					<div className="flex flex-col items-center justify-center">
-						<Board opponentShots={[]} show={true} clickable={false} grid={grid.current} />
+						<Board opponentShots={[]} show={true} clickable={false} grid={grid} />
+					</div>
+					<div className="mt-4 flex justify-center">
+						<Button variant="contained" onClick={handleRandomize} disabled={isRandomDisabled}>
+							Randomize layout
+						</Button>
 					</div>
 					<div className="mt-4 flex justify-center">
 						<Button variant="contained" onClick={handlePlay}>

@@ -11,10 +11,10 @@ export class Grid {
 
 	constructor() {
 		this.initializeGrid();
-		this.shipGenerator = new ShipGenerator(this);
 	}
 
 	private initializeGrid(): void {
+		this.grid = [];
 		const { size } = GAME_CONFIG;
 		for (let row = 0; row < size; row++) {
 			this.grid[row] = [];
@@ -28,6 +28,8 @@ export class Grid {
 		// To prevent some caching issues, we need to generate new ships every time
 		this.ships = [];
 		this.availableShips = [];
+		this.initializeGrid();
+		this.shipGenerator = new ShipGenerator(this);
 		this.setShips(this.shipGenerator.generateShips());
 	}
 

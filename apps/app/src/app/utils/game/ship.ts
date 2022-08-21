@@ -63,7 +63,7 @@ class Ship {
 		if (!isUnique) {
 			return;
 		}
-		this.hits.push(coordinates);
+		this.hits = [...this.hits, coordinates];
 		if (this.hits.length === this.size) {
 			this.isKilled = true;
 		}

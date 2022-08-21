@@ -18,6 +18,8 @@ export class ShipGenerator {
 	}
 
 	public generateShips() {
+		this.counter = 0;
+
 		type TShip = {
 			size: number;
 		};

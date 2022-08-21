@@ -1,5 +1,6 @@
 import "./reset.css";
 import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom";
@@ -13,6 +14,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { SocketProvider } from "app/utils/socket-provider";
+import { ToastContainer } from "react-toastify";
 
 const rootElement = document.getElementById("root") || document.body;
 // Create a client
@@ -29,6 +31,7 @@ const Main = () => {
 								<DndProvider backend={HTML5Backend}>
 									<Router />
 								</DndProvider>
+								<ToastContainer />
 							</Suspense>
 						</StyledEngineProvider>
 					</ThemeProvider>

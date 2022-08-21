@@ -1,3 +1,5 @@
+import { Coordinates } from "app/utils/types";
+
 export interface Position {
 	xStart: number;
 	yStart: number;
@@ -6,13 +8,17 @@ export interface Position {
 }
 
 class Ship {
-	private size: number;
+	private readonly id?: string;
+	private readonly size: number;
 	private xStart: number;
 	private yStart: number;
 	private xEnd: number;
 	private yEnd: number;
+	private isKilled = false;
+	private hits: Coordinates[] = [];
 
-	constructor({ xStart, yStart, xEnd, yEnd }: Position) {
+	constructor({ xStart, yStart, xEnd, yEnd }: Position, id?: string) {
+		this.id = id;
 		this.xStart = xStart;
 		this.yStart = yStart;
 		this.xEnd = xEnd;
@@ -34,4 +40,43 @@ class Ship {
 			this[key] = value;
 		});
 	}
+
+	public getCoordinates(): Position {
+		return {
+			xStart: this.xStart,
+			yStart: this.yStart,
+			xEnd: this.xEnd,
+			yEnd: this.yEnd,
+		};
+	}
+
+	public getIsKilled() {
+		return this.isKilled;
+	}
+
+	public getHits() {
+		return this.hits;
+	}
+
+	public hit(coordinates: Coordinates) {
+		const isUnique = this.hits.every((hit) => hit.x !== coordinates.x || hit.y !== coordinates.y);
+		if (!isUnique) {
+			return;
+		}
+		this.hits.push(coordinates);
+		if (this.hits.length === this.size) {
+			this.isKilled = true;
+		}
+	}
+
+	public isAt(coordinates: Coordinates) {
+		return (
+			this.xStart <= coordinates.x &&
+			this.xEnd >= coordinates.x &&
+			this.yStart <= coordinates.y &&
+			this.yEnd >= coordinates.y
+		);
+	}
 }
+
+export default Ship;

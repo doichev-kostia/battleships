@@ -2,8 +2,9 @@ import { Grid } from "app/utils/game/grid";
 import { GAME_CONFIG } from "app/constants/game-config";
 import { Cell } from "app/utils/game/cell";
 import _ from "lodash";
+import Ship, { Position as ShipPosition } from "app/utils/game/ship";
 
-type Ship = {
+type TShip = {
 	size: number;
 };
 
@@ -16,11 +17,11 @@ type Position = {
 };
 let counter = 0;
 const generatePosition = () => {
-	console.log({ counter: ++counter });
+	counter++;
 	const isHorizontal = Math.random() > 0.5;
 	const coordinates = {
-		x: Math.floor(Math.random() * (GAME_CONFIG.size - 1)),
-		y: Math.floor(Math.random() * (GAME_CONFIG.size - 1)),
+		x: Math.floor(Math.random() * GAME_CONFIG.size),
+		y: Math.floor(Math.random() * GAME_CONFIG.size),
 	};
 	return {
 		isHorizontal,
@@ -114,6 +115,7 @@ const isValidPosition = (grid: Cell[][], position: Position, shipSize: number) =
 };
 
 export const generateShips = (grid: Grid) => {
+	const placedShips: Ship[] = [];
 	let { ships } = GAME_CONFIG;
 	const gridCells = _.cloneDeep(grid.getGrid());
 	/**
@@ -121,8 +123,8 @@ export const generateShips = (grid: Grid) => {
 	 */
 	ships = ships.sort((a, b) => b.size - a.size);
 
-	const allShips = ships.reduce<Ship[]>((acc, ship) => {
-		const total: Ship[] = [];
+	const allShips = ships.reduce<TShip[]>((acc, ship) => {
+		const total: TShip[] = [];
 		for (let i = 0; i < ship.quantity; i++) {
 			total.push({ size: ship.size });
 		}
@@ -144,6 +146,21 @@ export const generateShips = (grid: Grid) => {
 		const { isHorizontal, coordinates } = position;
 
 		const shipCells = [];
+
+		const shipPosition: Partial<ShipPosition> = {
+			xStart: coordinates.x,
+			yStart: coordinates.y,
+		};
+
+		if (isHorizontal) {
+			shipPosition.xEnd = coordinates.x + shipLength - 1;
+			shipPosition.yEnd = coordinates.y;
+		} else {
+			shipPosition.xEnd = coordinates.x;
+			shipPosition.yEnd = coordinates.y + shipLength - 1;
+		}
+
+		placedShips.push(new Ship(shipPosition as ShipPosition));
 		for (let i = 0; i < shipLength; i++) {
 			const { x, y } = coordinates;
 			if (isHorizontal) {
@@ -153,8 +170,8 @@ export const generateShips = (grid: Grid) => {
 			}
 		}
 		shipCells.forEach(({ x, y }) => {
-			gridCells[y][x].setHasShip(true);
+			gridCells[y][x].setShip(new Ship(shipPosition as ShipPosition));
 		});
 	});
-	return gridCells;
+	return placedShips;
 };

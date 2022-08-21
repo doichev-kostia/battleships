@@ -15,5 +15,5 @@ cat >build/mjs/package.json <<!EOF
 !EOF
 
 cat >build/index.d.ts <<!EOF
-export * from "./mjs"
+export * from "./mjs";
 !EOF

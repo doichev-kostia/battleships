@@ -8,6 +8,7 @@ const Header = React.lazy(() => import("app/components/header/header"));
 const DashboardPage = React.lazy(() => import("app/pages/gamer/dashboard"));
 const ProfilePage = React.lazy(() => import("app/pages/shared/profile"));
 const GamePage = React.lazy(() => import("app/pages/gamer/game"));
+const WaitingRoomPage = React.lazy(() => import("app/pages/gamer/waiting-room"));
 const ArchivePage = React.lazy(() => import("app/pages/gamer/archive"));
 
 const headerPages = [
@@ -49,13 +50,24 @@ const GamerRouter = () => {
 					}
 				/>
 				<Route
-					path={`${paths.game}/:id`}
+					path={`${paths.game}/:gameId`}
 					element={
 						<>
 							<Helmet>
 								<title>Battleships | Gamer | Game</title>
 							</Helmet>
 							<GamePage />
+						</>
+					}
+				/>
+				<Route
+					path={`${paths.waitingRoom}/${paths.game}/:gameId`}
+					element={
+						<>
+							<Helmet>
+								<title>Battleships | Gamer | Waiting room</title>
+							</Helmet>
+							<WaitingRoomPage />
 						</>
 					}
 				/>

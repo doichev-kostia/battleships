@@ -7,6 +7,7 @@ export const paths = {
 	dashboard: "dashboard",
 	profile: "profile",
 	game: "game",
+	waitingRoom: "waiting-room",
 	archive: "archive",
 };
 
@@ -17,7 +18,8 @@ export const gamerAbsolutePaths = (() => {
 	return {
 		dashboard: applyBasePath(basePath, [paths.dashboard]),
 		profile: applyBasePath(basePath, [paths.profile]),
-		game: applyBasePath(basePath, [paths.game, ":id"]),
+		game: applyBasePath(basePath, [paths.game, ":gameId"]),
+		waitingRoom: applyBasePath(basePath, [paths.waitingRoom, paths.game, ":gameId"]),
 		archive: applyBasePath(basePath, [paths.archive]),
 	} as const;
 })();

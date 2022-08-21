@@ -1,153 +1,94 @@
-import React, { useMemo, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { Button, Container, Grid as MuiGrid, List, ListItem, Typography } from "@mui/material";
-import { Cell } from "app/components/cell";
-import { Cell as GridCell } from "app/utils/game/cell";
 import { Grid } from "app/utils/game/grid";
-import { Link } from "react-router-dom";
-import { gamerAbsolutePaths } from "app/constants/paths";
-import cx from "classnames";
-import { GAME_CONFIG, SHIPS } from "app/constants/game-config";
-import { generateShips } from "app/utils/game/generate-ships";
-
-const createShips = () => {
-	const { ships } = GAME_CONFIG;
-
-	return ships.map((ship) => {
-		const CELL_WIDTH = 20;
-		const componentLength = ship.size * CELL_WIDTH;
-		const shipName = SHIPS.get(ship.size);
-		return (
-			<ListItem
-				key={ship.size}
-				sx={{
-					width: componentLength,
-				}}
-				className="bg-amber-300 block"
-			>
-				<Typography variant="body1">{shipName}</Typography>
-				<Typography variant="body1">x: {ship.quantity}</Typography>
-			</ListItem>
-		);
-	});
-};
-
-const games = [
-	{
-		id: "1",
-		name: "Game 1",
-		players: [
-			{
-				id: "1",
-				name: "Player 1",
-			},
-		],
-	},
-	{
-		id: "2",
-		name: "Game 2",
-		players: [
-			{
-				id: "2",
-				name: "Player 2",
-			},
-		],
-	},
-];
-
-const shipsArr = [
-	{
-		xStart: 0,
-		xEnd: 0,
-		yStart: 0,
-		yEnd: 1,
-	},
-	{
-		xStart: 1,
-		xEnd: 1,
-		yStart: 3,
-		yEnd: 3,
-	},
-	{
-		xStart: 3,
-		xEnd: 3,
-		yStart: 0,
-		yEnd: 4,
-	},
-	{
-		xStart: 1,
-		xEnd: 3,
-		yStart: 7,
-		yEnd: 7,
-	},
-	{
-		xStart: 3,
-		xEnd: 5,
-		yStart: 9,
-		yEnd: 9,
-	},
-	{
-		xStart: 6,
-		xEnd: 7,
-		yStart: 4,
-		yEnd: 4,
-	},
-	{
-		xStart: 7,
-		xEnd: 7,
-		yStart: 9,
-		yEnd: 9,
-	},
-	{
-		xStart: 9,
-		xEnd: 9,
-		yStart: 3,
-		yEnd: 4,
-	},
-	{
-		xStart: 9,
-		xEnd: 9,
-		yStart: 6,
-		yEnd: 6,
-	},
-	{
-		xStart: 9,
-		xEnd: 9,
-		yStart: 8,
-		yEnd: 8,
-	},
-];
-
-const generateGrid = (grid: GridCell[][]) => {
-	return grid.map((row, rowIndex) => {
-		return (
-			<div className="flex flex-nowrap justify-center" key={rowIndex}>
-				{row.map((cell) => {
-					const x = cell.getX();
-					const y = cell.getY();
-					// const isShip = shipsArr.some((ship) => {
-					// 	return ship.xStart <= x && ship.xEnd >= x && ship.yStart <= y && ship.yEnd >= y;
-					// });
-					const isShip = cell.getHasShip();
-					return (
-						<Cell
-							key={`${x}-${y}`}
-							isShip={isShip}
-							className={cx(isShip && "bg-amber-500")}
-							coordinates={{ x, y }}
-						/>
-					);
-				})}
-			</div>
-		);
-	});
-};
+import { useNavigate } from "react-router-dom";
+import { gamerAbsolutePaths, paths } from "app/constants/paths";
+import { useFetchAvailableGames, useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
+import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
+import Board from "app/components/board/board";
+import { SocketContext } from "app/utils/socket-provider";
+import { Loader } from "app/components/loader";
+import { useQueryClient } from "react-query";
+import { gameKeys } from "data/queryKeys";
 
 const DashboardPage = () => {
+	const { socket } = useContext(SocketContext);
 	const grid = useRef<Grid>(new Grid());
 
-	const shipGrid = generateShips(grid.current);
-	const board = useMemo(() => generateGrid(shipGrid), [grid.current]);
-	const ships = useMemo(() => createShips(), []);
+	const navigate = useNavigate();
+	const tokenData = useTokenData();
+	const queryClient = useQueryClient();
+
+	const { mutate: initializeGame } = useInitializeGame();
+	const { mutate: joinGame } = useJoinGame();
+	const { data: availableGames, isLoading } = useFetchAvailableGames(tokenData?.role.id || "", {
+		enabled: !!tokenData?.role.id,
+	});
+
+	/**
+	 * @todo:
+	 * 1. add get available games query by checking whether the game has 2 players and 1 of them is not the current user
+	 * 2. invalidate the query when the new game is created by listening to the socket event
+	 * 3. add a new game to the list of available games
+	 * 4. join the new game and redirect to the waiting room page + disable it for other users
+	 */
+
+	if (!tokenData) {
+		navigate(`/${paths.signIn}`);
+		return;
+	}
+
+	useEffect(() => {
+		socket.on(SOCKET_EVENTS.GAME_JOIN, () => {
+			queryClient.invalidateQueries(gameKeys.available);
+		});
+
+		socket.on(SOCKET_EVENTS.GAME_START, () => {
+			queryClient.invalidateQueries(gameKeys.available);
+		});
+
+		grid.current.generateShips();
+	}, []);
+
+	const handlePlay = () => {
+		initializeGame(null, {
+			onSuccess: ({ id }: GameRepresentation) => {
+				const body = {
+					gameId: id,
+					body: {
+						userId: tokenData.userId,
+						ships: grid.current.getShips().map((ship) => ship.getCoordinates()),
+					},
+				};
+				joinGame(body, {
+					onSuccess: () => {
+						const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", id);
+						socket.emit(SOCKET_EVENTS.GAME_INIT);
+						socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId: id });
+						navigate(path, { replace: true });
+					},
+				});
+			},
+		});
+	};
+
+	const handleJoin = (gameId: string) => {
+		const body = {
+			gameId,
+			body: {
+				userId: tokenData.userId,
+				ships: grid.current.getShips().map((ship) => ship.getCoordinates()),
+			},
+		};
+		joinGame(body, {
+			onSuccess: () => {
+				const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", gameId);
+				socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
+				navigate(path, { replace: true });
+			},
+		});
+	};
+
 	return (
 		<Container component="main" maxWidth="xl" className="mt-3">
 			<Typography variant="h3" className="mb-10">
@@ -157,37 +98,45 @@ const DashboardPage = () => {
 				<MuiGrid item xs={12} md={3}>
 					<Typography variant="h5">Available games</Typography>
 					<List>
-						{games.map((game) => {
-							const { players } = game;
-							const player = players[0];
-							return (
-								<ListItem key={game.id} className="flex justify-between items-center pl-0">
-									<div>
-										<Typography variant="body1">{game.name}</Typography>
-										<Typography variant="body2">{player.name}</Typography>
-									</div>
-									<div>
-										<Button
-											component={Link}
-											to={gamerAbsolutePaths.game.replace(":id", game.id)}
-											variant="contained"
-											color="primary"
-											className="no-underline"
-										>
-											Join
-										</Button>
-									</div>
-								</ListItem>
-							);
-						})}
+						{!isLoading && availableGames?.items ? (
+							availableGames.items.map((game) => {
+								const { players } = game;
+								const { user } = players[0].role;
+								return (
+									<ListItem key={game.id} className="flex items-center justify-between pl-0">
+										<div>
+											<Typography variant="body1">{user.username}</Typography>
+										</div>
+										<div>
+											<Button
+												onClick={() => handleJoin(game.id)}
+												variant="contained"
+												color="primary"
+												className="no-underline"
+											>
+												Join
+											</Button>
+										</div>
+									</ListItem>
+								);
+							})
+						) : (
+							<Loader />
+						)}
 					</List>
 				</MuiGrid>
 				<MuiGrid item xs={12} md={9}>
-					<Typography variant="h5" className="text-center mb-4">
+					<Typography variant="h5" className="mb-4 text-center">
 						Prepare your grid
 					</Typography>
-					<div className="flex flex-col justify-center items-center">{board}</div>
-					<List className="flex flex-col gap-y-10">{ships}</List>
+					<div className="flex flex-col items-center justify-center">
+						<Board opponentShots={[]} show={true} clickable={false} grid={grid.current} />
+					</div>
+					<div className="mt-4 flex justify-center">
+						<Button variant="contained" onClick={handlePlay}>
+							Play
+						</Button>
+					</div>
 				</MuiGrid>
 			</MuiGrid>
 		</Container>

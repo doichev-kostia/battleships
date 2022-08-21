@@ -1,49 +1,104 @@
-import React, { useEffect, useState } from "react";
-import { GAME_CONFIG } from "app/constants/game-config";
-import { Game } from "app/utils/game/game";
+import React, { useRef } from "react";
+import { Grid as MuiGrid, Typography } from "@mui/material";
+import { useFetchGame, useShoot, useTokenData } from "data";
+import Board from "app/components/board/board";
+import { Grid } from "app/utils/game/grid";
+import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "app/components/loader";
-import { Grid } from "@mui/material";
-import { Cell } from "app/components/cell";
-import { Cell as GridCell } from "app/utils/game/cell";
+import Ship from "app/utils/game/ship";
+import { ShipRepresentation } from "@battleships/contracts/src";
+import { Coordinates } from "app/utils/types";
 
-const generateGrid = (grid: GridCell[][]) => {
-	return grid.map((row, rowIndex) => {
-		return (
-			<div className="flex flex-nowrap justify-center" key={rowIndex}>
-				{row.map((cell) => {
-					const x = cell.getX();
-					const y = cell.getY();
-					return <Cell key={`${x}-${y}`} coordinates={{ x, y }} />;
-				})}
-			</div>
-		);
-	});
+const makeShips = (ships: ShipRepresentation[]) => {
+	return ships.map(({ xStart, yStart, xEnd, yEnd }) => new Ship({ xStart, yStart, xEnd, yEnd }));
 };
 
 const GamePage = () => {
-	const [game, setGame] = useState<Game | null>(null);
+	const { gameId } = useParams<"gameId">();
+	const playerGrid = useRef(new Grid());
+	const opponentGrid = useRef(new Grid());
+	// const [isPlayerTurn, toggleTurn] = useToggleState(Math.random() > 0.5);
 
-	useEffect(() => {
-		setGame(new Game(GAME_CONFIG));
-	}, []);
+	const tokenData = useTokenData();
+	const navigate = useNavigate();
+	const { data: game, isLoading: isGameLoading } = useFetchGame(gameId || "", {
+		enabled: !!gameId,
+	});
 
-	if (!game) {
+	const { mutate: shoot } = useShoot();
+
+	if (isGameLoading || !game) {
 		return <Loader />;
 	}
 
-	window.game = game;
-	const playerGrid = generateGrid(game.getPlayerGrid());
-	const opponentGrid = generateGrid(game.getOpponentGrid());
+	if (!tokenData || !gameId) {
+		navigate("/");
+		return;
+	}
+
+	const player = game.players.find(
+		(player) => player?.role && player.role.id === tokenData.role.id,
+	);
+	const playerCells = playerGrid.current.getGrid();
+	const opponentCells = opponentGrid.current.getGrid();
+
+	const opponent = game.players.find((player) => {
+		// if a player is a computer
+		if (player?.role === null) {
+			return true;
+		}
+
+		if (player?.role && player.role.id === tokenData.role.id) {
+			return false;
+		}
+	});
+
+	const playerShips = makeShips(player.ships);
+	const opponentShips = makeShips(opponent.ships);
+
+	const handleShot = (coordinates: Coordinates, playerId: string) => {
+		shoot({
+			gameId,
+			body: {
+				x: coordinates.x,
+				y: coordinates.y,
+				playerId,
+			},
+		});
+	};
 
 	return (
-		<Grid container className="justify-between items-center mt-10">
-			<Grid item xs={12} md={6} className="mb-10 md:mb-0">
-				{playerGrid}
-			</Grid>
-			<Grid item xs={12} md={6}>
-				{opponentGrid}
-			</Grid>
-		</Grid>
+		<MuiGrid container className="mt-10 items-center justify-between">
+			<MuiGrid item xs={12} md={6} className="mb-10 md:mb-0">
+				<div className="mb-5">
+					<Typography variant="h5" className="text-center">
+						Your grid
+					</Typography>
+				</div>
+				<Board
+					clickable={false}
+					opponentShots={opponent.shots}
+					show={true}
+					ships={playerShips}
+					grid={playerCells}
+				/>
+			</MuiGrid>
+			<MuiGrid item xs={12} md={6}>
+				<div className="mb-5">
+					<Typography variant="h5" className="text-center">
+						Opponent's grid
+					</Typography>
+				</div>
+				<Board
+					opponentShots={player.shots}
+					onShot={(c) => handleShot(c, player.id)}
+					// onMiss={() => toggleTurn()}
+					ships={opponentShips}
+					// clickable={isPlayerTurn}
+					grid={opponentCells}
+				/>
+			</MuiGrid>
+		</MuiGrid>
 	);
 };
 

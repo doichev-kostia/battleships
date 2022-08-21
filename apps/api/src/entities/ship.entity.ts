@@ -8,14 +8,14 @@ export class Ship extends Base<Ship> {
 	public player: Player;
 
 	@Property()
-	public x_start: number;
+	public xStart: number;
 
 	@Property()
-	public y_start: number;
+	public yStart: number;
 
 	@Property()
-	public x_end: number;
+	public xEnd: number;
 
 	@Property()
-	public y_end: number;
+	public yEnd: number;
 }

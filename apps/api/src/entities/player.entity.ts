@@ -8,10 +8,10 @@ import { Ship } from "./ship.entity";
 
 @Entity()
 export class Player extends Base<Player> {
-	@ManyToOne(() => Role)
-	public role: Role;
+	@ManyToOne(() => Role, { nullable: true })
+	public role?: Role;
 
-	@Property()
+	@Property({ type: "boolean", default: false })
 	public isWinner = false;
 
 	@ManyToOne("Game")

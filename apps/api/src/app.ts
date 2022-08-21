@@ -16,28 +16,38 @@ import { routingControllersToSpec } from "routing-controllers-openapi";
 import * as swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import { paths } from "paths";
+import { createServer, Server } from "http";
+import SocketClient from "./socket";
 
 export class App {
 	public orm: MikroORM<PostgreSqlDriver>;
 	public readonly host: Express;
 	public readonly port: number;
+	public readonly socketPort: number;
+	public readonly socketServer: Server;
+	public socketClient: SocketClient;
 
 	constructor() {
 		dotenv.config();
 		this.port = Number(process.env.PORT) || 8000;
+		this.socketPort = Number(process.env.SOCKET_PORT) || 8001;
 		this.host = express();
+		this.socketServer = createServer(express());
+
 		this.initializeMiddlewares();
 		const controllers = importClasses([`${paths.root}/**/*.controller.js`]);
 		this.initializeControllers(controllers);
-		this.host.use((req, res, next) => {
-			res.status(404).json({ error: "Endpoint not found" });
-			next();
-		});
+		this.initializeSockets();
 		this.initializeDocs();
 		this.initializeErrorHandling();
 	}
 
+	private initializeSockets() {
+		this.socketClient = new SocketClient(this.socketServer);
+	}
+
 	public listen() {
+		this.socketServer.listen(this.socketPort);
 		this.host.listen(this.port, () => {
 			console.info(`=================================`);
 			console.info(`======= ENV: ${process.env.NODE_ENV} ========`);

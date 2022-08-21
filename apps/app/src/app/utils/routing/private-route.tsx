@@ -10,7 +10,7 @@ interface PrivateRouteProps {
 	roles: ROLE_TYPE[];
 }
 
-const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
+const PrivateRoute = ({ children, roles }: PrivateRouteProps): JSX.Element => {
 	const location = useLocation();
 
 	const tokenData = useTokenData();
@@ -25,7 +25,7 @@ const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
 		return <RedirectToBaseRoute />;
 	}
 
-	return children;
+	return <>{children}</>;
 };
 
 export default PrivateRoute;

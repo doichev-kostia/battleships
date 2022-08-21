@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { SocketProvider } from "app/utils/socket-provider";
 
 const rootElement = document.getElementById("root") || document.body;
 // Create a client
@@ -20,17 +21,19 @@ const queryClient = new QueryClient();
 const Main = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<BrowserRouter>
-				<ThemeProvider theme={theme}>
-					<StyledEngineProvider injectFirst>
-						<Suspense fallback={<Loader />}>
-							<DndProvider backend={HTML5Backend}>
-								<Router />
-							</DndProvider>
-						</Suspense>
-					</StyledEngineProvider>
-				</ThemeProvider>
-			</BrowserRouter>
+			<SocketProvider>
+				<BrowserRouter>
+					<ThemeProvider theme={theme}>
+						<StyledEngineProvider injectFirst>
+							<Suspense fallback={<Loader />}>
+								<DndProvider backend={HTML5Backend}>
+									<Router />
+								</DndProvider>
+							</Suspense>
+						</StyledEngineProvider>
+					</ThemeProvider>
+				</BrowserRouter>
+			</SocketProvider>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Grid } from "app/utils/game/grid";
 import { Button, Grid as MuiGrid, styled, Typography } from "@mui/material";
@@ -7,10 +7,9 @@ import Board from "app/components/board/board";
 import { Loader } from "app/components/loader";
 import Ship from "app/utils/game/ship";
 import { useQueryClient } from "react-query";
-import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
+import { GameRepresentation } from "@battleships/contracts";
 import { gameKeys } from "data/queryKeys";
 import { gamerAbsolutePaths } from "app/constants/paths";
-import { SocketContext } from "app/utils/socket-provider";
 
 const Overlay = styled("div")`
 	position: relative;
@@ -32,7 +31,6 @@ const Overlay = styled("div")`
 `;
 
 const WaitingRoom = () => {
-	const { socket } = useContext(SocketContext);
 	const [hasOpponentJoined, setHasOpponentJoined] = useState(false);
 	const { gameId } = useParams<"gameId">();
 	const grid = useRef(new Grid());
@@ -47,15 +45,6 @@ const WaitingRoom = () => {
 	const { mutate: joinGame } = useJoinGame();
 	const { mutate: startGame } = useStartGame();
 	const queryClient = useQueryClient();
-
-	useEffect(() => {
-		socket.on(SOCKET_EVENTS.GAME_JOIN, (data) => {
-			debugger;
-			if (data.gameId === gameId) {
-				setHasOpponentJoined(true);
-			}
-		});
-	}, []);
 
 	if (isLoading || !game) {
 		return <Loader />;

@@ -47,7 +47,7 @@ const GamePage = () => {
 		}
 	}, []);
 
-	// try using sockets, http doesn't work
+	// try using sockets, http doesn't work or just save everything when the game is over
 	const { mutate: shoot } = useShoot();
 
 	if (isGameLoading || !game) {

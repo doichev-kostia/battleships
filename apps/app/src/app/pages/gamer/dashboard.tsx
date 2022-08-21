@@ -1,25 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Container, Grid as MuiGrid, List, ListItem, Typography } from "@mui/material";
 import { Grid } from "app/utils/game/grid";
 import { useNavigate } from "react-router-dom";
 import { gamerAbsolutePaths, paths } from "app/constants/paths";
 import { useFetchAvailableGames, useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
-import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
+import { GameRepresentation } from "@battleships/contracts";
 import Board from "app/components/board/board";
 import { Loader } from "app/components/loader";
-import { useQueryClient } from "react-query";
-import { SocketContext } from "app/utils/socket-provider";
-import { gameKeys } from "data/queryKeys";
 
 const DashboardPage = () => {
-	const { socket } = useContext(SocketContext);
 	const [grid] = useState(new Grid());
 	const [randomizeCounter, setRandomizeCounter] = useState(0);
 	const [isRandomDisabled, setIsRandomDisabled] = useState(false);
 
 	const navigate = useNavigate();
 	const tokenData = useTokenData();
-	const queryClient = useQueryClient();
 
 	const { mutate: initializeGame } = useInitializeGame();
 	const { mutate: joinGame } = useJoinGame();
@@ -41,14 +36,6 @@ const DashboardPage = () => {
 	}
 
 	useEffect(() => {
-		socket.on(SOCKET_EVENTS.GAME_JOIN, () => {
-			queryClient.invalidateQueries(gameKeys.available);
-		});
-
-		socket.on(SOCKET_EVENTS.GAME_START, () => {
-			queryClient.invalidateQueries(gameKeys.available);
-		});
-
 		grid.generateShips();
 	}, []);
 
@@ -65,8 +52,6 @@ const DashboardPage = () => {
 				joinGame(body, {
 					onSuccess: () => {
 						const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", id);
-						socket.emit(SOCKET_EVENTS.GAME_INIT);
-						socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId: id });
 						navigate(path, { replace: true });
 					},
 				});
@@ -85,7 +70,6 @@ const DashboardPage = () => {
 		joinGame(body, {
 			onSuccess: () => {
 				const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", gameId);
-				socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
 				navigate(path, { replace: true });
 			},
 		});

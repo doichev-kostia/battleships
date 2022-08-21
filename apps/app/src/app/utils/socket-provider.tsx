@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
 interface ISocketContext {
@@ -11,9 +11,9 @@ interface SocketProviderProps {
 	children: React.ReactNode;
 }
 
-export const SocketProvider = ({ children }: SocketProviderProps) => {
-	const [socket] = useState<Socket>(io(import.meta.env.VITE_SOCKET_URL));
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
+export const SocketProvider = ({ children }: SocketProviderProps) => {
 	useEffect(() => {
 		return () => {
 			socket.disconnect();

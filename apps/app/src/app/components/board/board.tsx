@@ -61,7 +61,6 @@ const Board = ({
 	};
 
 	useEffect(() => {
-		console.time("effect");
 		const cells = grid.getGrid();
 		opponentShots.forEach(({ x, y }) => {
 			const currentCell = cells[y][x];
@@ -71,7 +70,6 @@ const Board = ({
 				addKilledShip(ship);
 			}
 		});
-		console.timeEnd("effect");
 	}, []);
 
 	return (

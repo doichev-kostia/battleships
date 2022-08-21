@@ -25,6 +25,9 @@ export class Grid {
 	}
 
 	public generateShips(): void {
+		// To prevent some caching issues, we need to generate new ships every time
+		this.ships = [];
+		this.availableShips = [];
 		this.setShips(this.shipGenerator.generateShips());
 	}
 

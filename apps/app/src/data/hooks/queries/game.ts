@@ -43,16 +43,7 @@ type UseFetchGameOptions = Omit<
 >;
 
 export const useFetchGame = (id: string, options?: UseFetchGameOptions) => {
-	const queryClient = useQueryClient();
-	return useQuery(gameKeys.get(id), () => fetchGame(id), {
-		...options,
-		onSuccess: (data) => {
-			queryClient.setQueryData(gameKeys.get(id), data);
-			if (typeof options?.onSuccess === "function") {
-				options.onSuccess(data);
-			}
-		},
-	});
+	return useQuery(gameKeys.get(id), () => fetchGame(id), options);
 };
 
 type UseJoinGameOptions = Omit<

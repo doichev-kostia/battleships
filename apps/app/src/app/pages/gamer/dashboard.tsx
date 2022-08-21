@@ -6,9 +6,9 @@ import { gamerAbsolutePaths, paths } from "app/constants/paths";
 import { useFetchAvailableGames, useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
 import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
 import Board from "app/components/board/board";
-import { SocketContext } from "app/utils/socket-provider";
 import { Loader } from "app/components/loader";
 import { useQueryClient } from "react-query";
+import { SocketContext } from "app/utils/socket-provider";
 import { gameKeys } from "data/queryKeys";
 
 const DashboardPage = () => {

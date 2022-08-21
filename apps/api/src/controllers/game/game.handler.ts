@@ -42,9 +42,10 @@ export class GameHandler {
 
 	public static getById = async (gameId: string) => {
 		const em = getEm();
-		return await em.findOneOrFail(Game, gameId, {
+		const game = await em.findOneOrFail(Game, gameId, {
 			populate: ["players.role", "players.ships", "players.shots"],
 		});
+		return game;
 	};
 
 	public static join = async (gameId: string, { userId, ships }: JoinGameBody) => {

@@ -32,8 +32,8 @@ export const useSignIn = (options?: UseSignInOptions) => {
 	return useMutation(authKeys.login, login, {
 		...options,
 		retry: false,
-		onSuccess: () => {
-			queryClient.invalidateQueries(authKeys.login);
+		onSuccess: (data) => {
+			queryClient.setQueryData(authKeys.login, data);
 		},
 	});
 };

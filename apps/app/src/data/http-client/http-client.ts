@@ -32,7 +32,6 @@ class HttpClient {
 		const configCopy = { ...config };
 
 		const { auth, refresh } = JSON.parse(Cookies.get(AUTH_COOKIES_KEY) ?? "{}") as AuthCookie;
-
 		if (typeof auth === "string" && auth) {
 			const { exp, role, userId } = jwtDecode<AccessTokenData>(auth);
 			const hasTokenExpired = new Date().getTime() / 1000 > Number(exp) - 5;

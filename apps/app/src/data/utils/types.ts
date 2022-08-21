@@ -1,5 +1,10 @@
 import { AxiosError } from "axios";
 
+export type ListRepresentation<Entity extends object> = {
+	count: number;
+	items: Entity[];
+};
+
 export type APIError<Errors = unknown> = {
 	message: string;
 	reason: string;

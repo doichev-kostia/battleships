@@ -19,3 +19,16 @@ export const userKeys = (() => {
 		get: (id: string) => `${base}/get/${id}`,
 	} as const;
 })();
+
+export const gameKeys = (() => {
+	const base = "game";
+	return {
+		create: `${base}/create`,
+		join: `${base}/join`,
+		get: (id: string) => `${base}/get/${id}`,
+		start: `${base}/start`,
+		finish: `${base}/finish`,
+		shoot: `${base}/shoot`,
+		available: `${base}/available`,
+	};
+})();

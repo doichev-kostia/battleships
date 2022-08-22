@@ -6,7 +6,6 @@ export class Cell {
 	private readonly y: number;
 	private isHit = false;
 	private ship: Ship | null = null;
-	private ref: HTMLDivElement | null = null;
 
 	constructor(x: number, y: number) {
 		this.x = x;
@@ -19,14 +18,6 @@ export class Cell {
 
 	public getY(): number {
 		return this.y;
-	}
-
-	public getRef() {
-		return this.ref;
-	}
-
-	public setRef(ref: HTMLDivElement) {
-		this.ref = ref;
 	}
 
 	public getCoordinates(): Coordinates {

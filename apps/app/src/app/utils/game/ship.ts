@@ -35,12 +35,6 @@ class Ship {
 		}
 	}
 
-	public move(position: Position) {
-		Object.entries(position).forEach(([key, value]) => {
-			this[key] = value;
-		});
-	}
-
 	public getCoordinates(): Position {
 		return {
 			xStart: this.xStart,

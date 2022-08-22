@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Container, Grid as MuiGrid, List, ListItem, Typography } from "@mui/material";
+import { Button, Container, Grid as MuiGrid, Typography } from "@mui/material";
 import { Grid } from "app/utils/game/grid";
 import { useNavigate } from "react-router-dom";
 import { gamerAbsolutePaths, paths } from "app/constants/paths";
-import { useFetchAvailableGames, useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
+import { useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
 import { GameRepresentation } from "@battleships/contracts";
-import Board from "app/components/board/board";
-import { Loader } from "app/components/loader";
+import { PreviewBoard } from "app/components/preview-board/preview-board";
 
 const DashboardPage = () => {
 	const [grid] = useState(new Grid());
@@ -18,9 +17,6 @@ const DashboardPage = () => {
 
 	const { mutate: initializeGame } = useInitializeGame();
 	const { mutate: joinGame } = useJoinGame();
-	const { data: availableGames, isLoading } = useFetchAvailableGames(tokenData?.role.id || "", {
-		enabled: !!tokenData?.role.id,
-	});
 
 	/**
 	 * @todo:
@@ -59,22 +55,6 @@ const DashboardPage = () => {
 		});
 	};
 
-	const handleJoin = (gameId: string) => {
-		const body = {
-			gameId,
-			body: {
-				userId: tokenData.userId,
-				ships: grid.getShips().map((ship) => ship.getCoordinates()),
-			},
-		};
-		joinGame(body, {
-			onSuccess: () => {
-				const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", gameId);
-				navigate(path, { replace: true });
-			},
-		});
-	};
-
 	const handleRandomize = () => {
 		grid.generateShips();
 
@@ -93,42 +73,12 @@ const DashboardPage = () => {
 				Dashboard
 			</Typography>
 			<MuiGrid container rowSpacing={2} columnSpacing={2}>
-				<MuiGrid item xs={12} md={3}>
-					<Typography variant="h5">Available games</Typography>
-					<List>
-						{!isLoading && availableGames?.items ? (
-							availableGames.items.map((game) => {
-								const { players } = game;
-								const { user } = players[0].role;
-								return (
-									<ListItem key={game.id} className="flex items-center justify-between pl-0">
-										<div>
-											<Typography variant="body1">{user.username}</Typography>
-										</div>
-										<div>
-											<Button
-												onClick={() => handleJoin(game.id)}
-												variant="contained"
-												color="primary"
-												className="no-underline"
-											>
-												Join
-											</Button>
-										</div>
-									</ListItem>
-								);
-							})
-						) : (
-							<Loader />
-						)}
-					</List>
-				</MuiGrid>
-				<MuiGrid item xs={12} md={9}>
+				<MuiGrid item xs={12}>
 					<Typography variant="h5" className="mb-4 text-center">
 						Prepare your grid
 					</Typography>
 					<div className="flex flex-col items-center justify-center">
-						<Board opponentShots={[]} show={true} clickable={false} grid={grid} />
+						<PreviewBoard grid={grid} />
 					</div>
 					<div className="mt-4 flex justify-center">
 						<Button variant="contained" onClick={handleRandomize} disabled={isRandomDisabled}>

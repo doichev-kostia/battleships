@@ -1,102 +1,85 @@
-import React, { useEffect, useState } from "react";
-import Ship from "app/utils/game/ship";
-import { Coordinates } from "app/utils/types";
-import { Grid } from "app/utils/game/grid";
-import { Cell as GridCell } from "app/utils/game/cell";
-import { Cell } from "app/components/cell";
+import React, { useEffect } from "react";
+import { GAME_CONFIG } from "app/constants/game-config";
 import cx from "classnames";
+import Ship from "../../utils/game/ship";
 import { Typography } from "@mui/material";
+import { Coordinates } from "../../utils/types";
+import { getRandomInt } from "../../utils/helpers";
 
-interface GridProps {
-	grid: Grid;
+interface BoardProps {
+	setHasComputerShot?: React.Dispatch<React.SetStateAction<boolean>>;
+	ships: Ship[];
+	hide?: boolean;
 	clickable?: boolean;
-	isOpponentComputer?: boolean;
-	show?: boolean;
-	showHints?: boolean;
 	opponentShots: Coordinates[];
-	onMiss?: (coordinates: Coordinates) => void;
-	onHit?: (coordinates: Coordinates) => void;
-	onShot?: (coordinates: Coordinates) => void;
-	onLose?: () => void;
-	triggerComputerShot?: () => void;
+	setShots: (c: Coordinates) => void;
+	isOpponentComputer?: boolean;
+	isTurn: boolean;
+	isPrevShotSuccessful?: boolean;
 }
 
-const useKilledShips = () => {
-	const [killedShips, setKilledShips] = useState<Ship[]>([]);
+let queue: Coordinates[] = [];
+const generateRandomCoordinates = (successfulShot?: Coordinates) => {
+	if (successfulShot) {
+		queue = [
+			{
+				x: successfulShot.x - 1,
+				y: successfulShot.y,
+			},
+			{
+				x: successfulShot.x + 1,
+				y: successfulShot.y,
+			},
+			{
+				x: successfulShot.x,
+				y: successfulShot.y - 1,
+			},
+			{
+				x: successfulShot.x,
+				y: successfulShot.y + 1,
+			},
+		];
+	}
 
-	const addKilledShip = (ship: Ship) => {
-		setKilledShips([...killedShips, ship]);
-	};
+	if (queue.length) {
+		return queue.pop() as Coordinates;
+	}
 
-	return [killedShips, addKilledShip] as const;
+	const x = getRandomInt(0, GAME_CONFIG.size + 1);
+	const y = getRandomInt(0, GAME_CONFIG.size + 1);
+
+	return { x, y } as Coordinates;
 };
 
+const isValidShot = (coordinates: Coordinates, opponentShots: Coordinates[]) => {
+	const { x, y } = coordinates;
+	const isInRange = x >= 0 && x < GAME_CONFIG.size && y >= 0 && y < GAME_CONFIG.size;
+	if (!isInRange) {
+		return false;
+	}
+
+	return !opponentShots.some((c) => c.x === x && c.y === y);
+};
+
+let prevShot: Coordinates;
+
 const Board = ({
-	grid,
-	clickable = true,
-	show = false,
-	showHints = false,
-	isOpponentComputer = false,
-	onMiss,
-	onShot,
-	onHit,
-	onLose,
+	clickable = false,
+	ships,
+	hide = false,
 	opponentShots,
-}: GridProps): JSX.Element => {
-	const [killedShips, addKilledShip] = useKilledShips();
-	const [cells, setCells] = useState<GridCell[][]>([]);
-
-	const isKilled = (ship: Ship) => {
-		return killedShips.includes(ship);
-	};
-
-	const handleHit = (coordinates: Coordinates) => {
-		cells[coordinates.y][coordinates.x].hit();
-		if (typeof onHit === "function") {
-			onHit(coordinates);
-		}
-	};
-
-	const handleMiss = (coordinates: Coordinates) => {
-		if (typeof onMiss === "function") {
-			onMiss(coordinates);
-		}
-	};
-
-	const handleShot = (coordinates: Coordinates) => {
-		if (typeof onShot === "function") {
-			onShot(coordinates);
-		}
-	};
-
-	useEffect(() => {
-		if (grid.getAvailableShips().length === 0) {
-			if (typeof onLose === "function") {
-				onLose();
-			}
-		}
-	}, [grid.getAvailableShips()]);
-
-	useEffect(() => {
-		const cells = grid.getGrid();
-		opponentShots.forEach(({ x, y }) => {
-			const currentCell = cells[y][x];
-			currentCell.hit();
-			const ship = currentCell.getShip();
-			if (ship && ship.getIsKilled()) {
-				addKilledShip(ship);
-				grid.killShip(ship);
-			}
-		});
-		setCells(cells);
-	}, [opponentShots]);
-
+	setShots,
+	isOpponentComputer = false,
+	isPrevShotSuccessful = false,
+	isTurn,
+	setHasComputerShot,
+}: BoardProps): JSX.Element => {
 	const processColumnDecks = () => {
 		const columns = [];
-		for (let i = 0; i < grid.getGrid().length; i++) {
+		for (let i = 0; i < GAME_CONFIG.size; i++) {
 			let columnDecks = 0;
-			for (let j = 0; j < grid.getGrid().length; j++) {
-				columnDecks += grid.getGrid()[j][i].getShip() ? 1 : 0;
+			for (let j = 0; j < GAME_CONFIG.size; j++) {
+				columnDecks += Number(ships.some((ship) => ship.isAt({ x: i, y: j })));
 			}
 			columns.push(columnDecks);
 		}
@@ -109,59 +92,77 @@ const Board = ({
 		});
 	};
 
+	const handleClick = ({ x, y }: Coordinates) => {
+		setShots({ x, y });
+	};
+
+	const makeComputerShot = () => {
+		let coordinates: Coordinates;
+		do {
+			coordinates = generateRandomCoordinates(isPrevShotSuccessful ? prevShot : undefined);
+		} while (!isValidShot(coordinates, opponentShots));
+		prevShot = coordinates;
+		setShots(coordinates);
+		if (typeof setHasComputerShot === "function") {
+			setHasComputerShot(true);
+		}
+	};
+
+	useEffect(() => {
+		if (isOpponentComputer && isTurn) {
+			if (typeof setHasComputerShot === "function") {
+				setHasComputerShot(false);
+			}
+			console.log("Computer shot");
+			makeComputerShot();
+		}
+	}, [isOpponentComputer, isTurn]);
+
 	return (
 		<>
-			{cells.map((row, rowIndex) => {
-				const numberOfDecks = row.map((cell) => cell.getShip()).filter(Boolean).length;
+			{[...Array(GAME_CONFIG.size)].fill(0).map((_, y) => {
+				let numberOfDecks = 0;
+				[...Array(GAME_CONFIG.size)].fill(0).forEach((_, x) => {
+					if (ships.some((ship) => ship.isAt({ x, y }))) {
+						numberOfDecks++;
+					}
+				});
 				return (
-					<div className="flex flex-nowrap justify-center" key={rowIndex}>
-						{row.map((cell) => {
-							const { x, y } = cell.getCoordinates();
-							const currentShip = cell.getShip();
-							const isShip = currentShip != undefined;
+					<div className="flex flex-nowrap justify-center" key={y}>
+						{[...Array(GAME_CONFIG.size)].fill(0).map((_, x) => {
+							const ship = ships.find((ship) => ship.isAt({ x, y }));
+							const isHit = opponentShots.some((c) => c.x === x && c.y === y);
+
+							const color = (() => {
+								if (!!ship && !hide) return "bg-yellow-600";
+								if (ship?.getIsKilled()) return "bg-red-500";
+								if (!!ship && isHit) return "bg-green-500";
+								if (isHit) return "bg-blue-500";
+							})();
 
 							return (
-								<Cell
-									isOpponentComputer={isOpponentComputer}
-									ref={(el) => {
-										if (el) {
-											cell.setRef(el);
-										}
-									}}
-									cell={cell}
-									clickable={clickable}
-									onShot={handleShot}
-									onMiss={handleMiss}
-									onHit={handleHit}
-									onKill={(c) => {
-										if (isShip) {
-											grid.killShip(currentShip);
-											addKilledShip(currentShip);
-										}
-									}}
-									isKilled={isShip && isKilled(currentShip)}
+								<div
 									key={`${x}-${y}`}
-									className={cx(isShip && show && "bg-amber-500")}
+									role="button"
+									tabIndex={0}
+									onClick={() => !isHit && clickable && handleClick({ x, y })}
+									className={cx(color, "h-10 w-10 cursor-pointer border border-solid")}
 								/>
 							);
 						})}
 						<div className="flex h-10 w-10 items-center">
-							{showHints && (
-								<Typography variant="body2" className="flex-1 text-center">
-									{numberOfDecks}
-								</Typography>
-							)}
+							<Typography variant="body2" className="flex-1 text-center">
+								{numberOfDecks}
+							</Typography>
 						</div>
 					</div>
 				);
 			})}
 			<div className="flex items-center justify-center">
-				{showHints && (
-					<>
-						{processColumnDecks()}
-						<div className="h-10 w-10" />
-					</>
-				)}
+				<>
+					{processColumnDecks()}
+					<div className="h-10 w-10" />
+				</>
 			</div>
 		</>
 	);

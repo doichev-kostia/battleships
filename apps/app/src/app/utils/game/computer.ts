@@ -19,9 +19,7 @@ export class Computer {
 			coordinates = this.generateRandomShotCoordinates();
 		} while (!this.isValidShot(coordinates));
 		this.prevShot = coordinates;
-		const cell = this.grid.getGrid()[coordinates.y][coordinates.x];
-		const ref = cell.getRef();
-		ref?.click();
+		return coordinates;
 	}
 
 	public setShotSuccessful(isSuccessful: boolean) {

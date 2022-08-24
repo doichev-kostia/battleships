@@ -1,17 +1,39 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Grid } from "app/utils/game/grid";
-import { Button, Grid as MuiGrid, Typography } from "@mui/material";
+import { Button, Grid as MuiGrid, styled, Typography } from "@mui/material";
 import { useFetchGame, useJoinGame, useStartGame, useTokenData } from "data";
 import { Loader } from "app/components/loader";
 import Ship from "app/utils/game/ship";
 import { useQueryClient } from "react-query";
-import { GameRepresentation } from "@battleships/contracts";
+import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
 import { gameKeys } from "data/queryKeys";
 import { gamerAbsolutePaths } from "app/constants/paths";
 import { PreviewBoard } from "../../components/preview-board/preview-board";
+import { SocketContext } from "../../utils/socket-provider";
+
+const Overlay = styled("div")`
+	position: relative;
+
+	&::after {
+		content: "Waiting for opponent...";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: #ffffff;
+	}
+`;
 
 const WaitingRoom = () => {
+	const { socket } = useContext(SocketContext);
+	const [hasOpponentJoined, setHasOpponentJoined] = useState(false);
 	const { gameId } = useParams<"gameId">();
 	const grid = useRef(new Grid());
 
@@ -25,6 +47,15 @@ const WaitingRoom = () => {
 	const { mutate: joinGame } = useJoinGame();
 	const { mutate: startGame } = useStartGame();
 	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		socket.on(SOCKET_EVENTS.GAME_JOIN, (data) => {
+			debugger;
+			if (data.gameId === gameId) {
+				setHasOpponentJoined(true);
+			}
+		});
+	}, []);
 
 	if (isLoading || !game) {
 		return <Loader />;
@@ -86,6 +117,15 @@ const WaitingRoom = () => {
 			<MuiGrid container className="mt-10 items-center justify-between">
 				<MuiGrid item xs={12} md={6} className="mb-10 md:mb-0">
 					<PreviewBoard grid={grid.current} />
+				</MuiGrid>
+				<MuiGrid item xs={12} md={6}>
+					{hasOpponentJoined ? (
+						<PreviewBoard grid={new Grid()} />
+					) : (
+						<Overlay>
+							<PreviewBoard grid={new Grid()} />
+						</Overlay>
+					)}
 				</MuiGrid>
 			</MuiGrid>
 			<div className="mt-7 flex items-center justify-center">

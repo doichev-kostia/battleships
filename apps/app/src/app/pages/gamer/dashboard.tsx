@@ -33,6 +33,7 @@ const DashboardPage = () => {
 
 	useEffect(() => {
 		grid.generateShips();
+		setRandomizeCounter(randomizeCounter + 1);
 	}, []);
 
 	const handlePlay = () => {

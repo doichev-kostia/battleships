@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid as MuiGrid, Typography } from "@mui/material";
 import { useFetchGame, useTokenData } from "data";
-import Board from "app/components/board/board";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "app/components/loader";
 import { Coordinates } from "app/utils/types";
 import { toast } from "react-toastify";
 import Ship from "../../utils/game/ship";
+import create from "zustand";
+import Board from "../../components/board/board";
 
 const STORAGE_KEYS = {
 	playerShots: "playerShots",
@@ -14,30 +15,56 @@ const STORAGE_KEYS = {
 	isPlayerTurn: "isPlayerTurn",
 };
 
-let isComputerShotSuccessful = false;
+interface ShotsStore {
+	shots: Coordinates[];
+	addShot: (c: Coordinates) => void;
+}
 
+const usePlayerShotsStore = create<ShotsStore>((set) => ({
+	shots: JSON.parse(sessionStorage.getItem(STORAGE_KEYS.playerShots) || "[]"),
+	addShot: (c: Coordinates) =>
+		set((state) => {
+			sessionStorage.setItem(STORAGE_KEYS.playerShots, JSON.stringify([...state.shots, c]));
+			return {
+				shots: [...state.shots, c],
+			};
+		}),
+}));
+
+const useComputerShotsStore = create<ShotsStore>((set) => ({
+	shots: JSON.parse(sessionStorage.getItem(STORAGE_KEYS.opponentShots) || "[]"),
+	addShot: (c: Coordinates) =>
+		set((state) => {
+			sessionStorage.setItem(STORAGE_KEYS.opponentShots, JSON.stringify([...state.shots, c]));
+			return {
+				shots: [...state.shots, c],
+			};
+		}),
+}));
+let renders = 0;
 const GamePage = () => {
 	const { gameId } = useParams<"gameId">();
-	const [isPlayerTurn, setPlayerTurn] = useState(
-		JSON.parse(sessionStorage.getItem(STORAGE_KEYS.isPlayerTurn) || "null") ?? true,
-	);
-	const [playerShots, setPlayerShots] = useState<Coordinates[]>(
-		JSON.parse(sessionStorage.getItem(STORAGE_KEYS.playerShots) || "[]"),
-	);
-	const [computerShots, setComputerShots] = useState<Coordinates[]>(
-		JSON.parse(sessionStorage.getItem(STORAGE_KEYS.opponentShots) || "[]"),
-	);
-	const [hasComputerShot, setHasComputerShot] = useState<boolean>(false);
+	const [isPlayerTurn, setPlayerTurn] = useState(true);
+	const playerShots = usePlayerShotsStore((state) => state.shots);
+	const addPlayerShot = usePlayerShotsStore((state) => state.addShot);
+	const computerShots = useComputerShotsStore((state) => state.shots);
+	const addComputerShot = useComputerShotsStore((state) => state.addShot);
+	const [isComputerShotSuccessful, setIsComputerShotSuccessful] = useState(false);
+
+	console.log({ renders: renders++ });
 
 	const tokenData = useTokenData();
 	const navigate = useNavigate();
-	const { data: game, isLoading: isGameLoading } = useFetchGame(gameId || "", {
-		enabled: !!gameId,
-	});
+	const { data: game, isLoading: isGameLoading, refetch } = useFetchGame(gameId || "");
+
+	useEffect(() => {
+		if (gameId) {
+			refetch();
+		}
+	}, []);
 
 	const toggleTurn = () => {
-		sessionStorage.setItem("isPlayerTurn", JSON.stringify(!isPlayerTurn));
-		setPlayerTurn(!isPlayerTurn);
+		setPlayerTurn((prevState) => !prevState);
 	};
 
 	if (isGameLoading || !game) {
@@ -114,25 +141,25 @@ const GamePage = () => {
 	});
 
 	type SetShotsArgs = {
-		setter: React.Dispatch<React.SetStateAction<Coordinates[]>>;
-		shots: Coordinates[];
+		setter: (c: Coordinates) => void;
 		currentShot: Coordinates;
 		storageKey: string;
 		opponentShips: Ship[];
 	};
 
-	const setShots = ({ setter, shots, currentShot, storageKey, opponentShips }: SetShotsArgs) => {
-		setter([...shots, currentShot]);
+	const setShots = ({ setter, currentShot, storageKey, opponentShips }: SetShotsArgs) => {
 		const isHit = opponentShips.some((ship) => ship.isAt(currentShot));
 		if (!isHit) {
 			toggleTurn();
+			setIsComputerShotSuccessful(false);
 		}
 		if (isHit && storageKey === STORAGE_KEYS.opponentShots) {
-			isComputerShotSuccessful = true;
+			setIsComputerShotSuccessful(true);
 		}
-		sessionStorage.setItem(storageKey, JSON.stringify([...shots, currentShot]));
+		setter(currentShot);
 	};
 
+	console.log({ isPlayerTurn, playerShots, computerShots });
 	return (
 		<MuiGrid container className="mt-10 items-center justify-between">
 			<MuiGrid item xs={12} md={6} className="mb-10 md:mb-0" id="player">
@@ -142,16 +169,14 @@ const GamePage = () => {
 					</Typography>
 				</div>
 				<Board
-					setHasComputerShot={setHasComputerShot}
 					isPrevShotSuccessful={isComputerShotSuccessful}
-					isTurn={isPlayerTurn}
+					isTurn={!isPlayerTurn}
 					isOpponentComputer={true}
 					opponentShots={computerShots}
 					ships={playerShips}
 					setShots={(c) =>
 						setShots({
-							setter: setComputerShots,
-							shots: computerShots,
+							setter: addComputerShot,
 							currentShot: c,
 							storageKey: STORAGE_KEYS.opponentShots,
 							opponentShips: playerShips,
@@ -166,15 +191,14 @@ const GamePage = () => {
 					</Typography>
 				</div>
 				<Board
-					clickable={isPlayerTurn && hasComputerShot}
-					isTurn={!isPlayerTurn}
+					clickable={isPlayerTurn}
+					isTurn={isPlayerTurn}
 					opponentShots={playerShots}
 					hide
 					ships={opponentShips}
 					setShots={(c) =>
 						setShots({
-							setter: setPlayerShots,
-							shots: playerShots,
+							setter: addPlayerShot,
 							currentShot: c,
 							storageKey: STORAGE_KEYS.playerShots,
 							opponentShips,

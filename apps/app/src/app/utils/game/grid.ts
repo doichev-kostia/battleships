@@ -1,21 +1,26 @@
-import { GAME_CONFIG } from "app/constants/game-config";
+import { GAME_CONFIG, GridSize } from "app/constants/game-config";
 import { Cell } from "app/utils/game/cell";
 import Ship from "./ship";
 import { ShipGenerator } from "./ship-generator";
+import { Coordinates } from "../types";
 
 export class Grid {
+	private size: GridSize;
 	private grid: Cell[][] = [];
 	private ships: Ship[] = [];
 	private availableShips: Ship[] = [];
 	private shipGenerator: ShipGenerator;
 
-	constructor() {
+	constructor(size: GridSize = "standard") {
+		this.size = size;
 		this.initializeGrid();
 	}
 
+	public getSize = () => this.size;
+
 	private initializeGrid(): void {
 		this.grid = [];
-		const { size } = GAME_CONFIG;
+		const { size } = GAME_CONFIG[this.size];
 		for (let row = 0; row < size; row++) {
 			this.grid[row] = [];
 			for (let col = 0; col < size; col++) {
@@ -56,6 +61,23 @@ export class Grid {
 
 	public getAvailableCells(): Cell[] {
 		return this.grid.flat(2).filter((cell) => !cell.getIsHit());
+	}
+
+	public getNeighbours({ x, y }: Coordinates): Cell[] {
+		const neighbours: Cell[] = [];
+		if (x > 0) {
+			neighbours.push(this.grid[y][x - 1]);
+		}
+		if (x < this.grid[y].length - 1) {
+			neighbours.push(this.grid[y][x + 1]);
+		}
+		if (y > 0) {
+			neighbours.push(this.grid[y - 1][x]);
+		}
+		if (y < this.grid.length - 1) {
+			neighbours.push(this.grid[y + 1][x]);
+		}
+		return neighbours;
 	}
 
 	public fillWithShips(): void {

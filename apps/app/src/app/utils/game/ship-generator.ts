@@ -11,10 +11,11 @@ type Position = {
 export class ShipGenerator {
 	private grid: Grid;
 	private counter = 0;
-	private configShips = GAME_CONFIG.ships;
+	private config = GAME_CONFIG.standard;
 
 	constructor(grid: Grid) {
 		this.grid = grid;
+		this.config = GAME_CONFIG[grid.getSize()];
 	}
 
 	public generateShips() {
@@ -29,7 +30,7 @@ export class ShipGenerator {
 		/**
 		 * Sort from largest to smallest
 		 */
-		const ships = this.configShips.sort((a, b) => b.size - a.size);
+		const ships = this.config.ships.sort((a, b) => b.size - a.size);
 
 		const allShips = ships.reduce<TShip[]>((acc, ship) => {
 			const total: TShip[] = [];
@@ -86,8 +87,8 @@ export class ShipGenerator {
 		this.counter++;
 		const isHorizontal = Math.random() > 0.5;
 		const coordinates = {
-			x: Math.floor(Math.random() * GAME_CONFIG.size),
-			y: Math.floor(Math.random() * GAME_CONFIG.size),
+			x: Math.floor(Math.random() * this.config.size),
+			y: Math.floor(Math.random() * this.config.size),
 		};
 
 		return {
@@ -102,8 +103,8 @@ export class ShipGenerator {
 		const { isHorizontal, coordinates } = position;
 		const { x, y } = coordinates;
 		const isInGridRange = isHorizontal
-			? x + shipSize <= GAME_CONFIG.size - 1
-			: y + shipSize <= GAME_CONFIG.size - 1;
+			? x + shipSize <= this.config.size - 1
+			: y + shipSize <= this.config.size - 1;
 
 		if (!isInGridRange) {
 			return false;

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Ship from "../../utils/game/ship";
 import { Typography } from "@mui/material";
 import { Coordinates } from "../../utils/types";
@@ -6,6 +6,8 @@ import { getRandomInt } from "../../utils/helpers";
 import { Grid } from "../../utils/game/grid";
 import { Cell } from "../../utils/game/cell";
 import cx from "classnames";
+import { useAtom } from "jotai";
+import { gridSizeAtom } from "../../utils/atoms";
 
 interface BoardProps {
 	ships: Ship[];
@@ -16,6 +18,7 @@ interface BoardProps {
 	isOpponentComputer?: boolean;
 	isTurn: boolean;
 	isPrevShotSuccessful?: boolean;
+	onLost: () => void;
 }
 
 const generateRandomCoordinates = (availableCells: Cell[]) => {
@@ -23,6 +26,8 @@ const generateRandomCoordinates = (availableCells: Cell[]) => {
 	const cell = availableCells[index];
 	return cell.getCoordinates();
 };
+
+let prevShot: Coordinates | null = null;
 
 const Board = ({
 	clickable = false,
@@ -33,11 +38,17 @@ const Board = ({
 	isOpponentComputer = false,
 	isPrevShotSuccessful = false,
 	isTurn,
-}: BoardProps): JSX.Element => {
-	const grid = useRef(new Grid());
+	onLost,
+}: BoardProps): React.ReactNode => {
+	const [gridSize] = useAtom(gridSizeAtom);
+	const [grid, setGrid] = useState(new Grid(gridSize));
 
-	grid.current.setShips(ships);
-	grid.current.getGrid().forEach((row) => {
+	useEffect(() => {
+		setGrid(new Grid(gridSize));
+	}, [gridSize]);
+
+	grid.setShips(ships);
+	grid.getGrid().forEach((row) => {
 		row.forEach((cell) => {
 			const { x, y } = cell.getCoordinates();
 			ships.forEach((ship) => ship.isAt({ x, y }) && cell.setShip(ship));
@@ -46,23 +57,23 @@ const Board = ({
 				cell.hit();
 			}
 
-			if (cell.getShip()?.getIsKilled()) {
-				grid.current.killShip(cell.getShip());
+			const ship = cell.getShip();
+			if (ship?.getIsKilled()) {
+				grid.killShip(ship);
 			}
 		});
 	});
 
-	if (grid.current.getShips().length > 0 && grid.current.getAvailableShips()?.length === 0) {
-		console.log("You lost!");
-		return <div>LOST</div>;
+	if (grid.getShips().length > 0 && grid.getAvailableShips()?.length === 0) {
+		onLost();
 	}
 
 	const processColumnDecks = () => {
 		const columns: number[] = [];
-		for (let i = 0; i < grid.current.getGrid().length; i++) {
+		for (let i = 0; i < grid.getGrid().length; i++) {
 			let columnDecks = 0;
-			for (let j = 0; j < grid.current.getGrid().length; j++) {
-				columnDecks += grid.current.getGrid()[j][i].getShip() ? 1 : 0;
+			for (let j = 0; j < grid.getGrid().length; j++) {
+				columnDecks += grid.getGrid()[j][i].getShip() ? 1 : 0;
 			}
 			columns.push(columnDecks);
 		}
@@ -80,12 +91,20 @@ const Board = ({
 	};
 
 	const makeComputerShot = () => {
-		const availableCells = grid.current.getAvailableCells();
+		let availableCells = grid.getAvailableCells();
 		if (!availableCells) {
-			console.log("no available cells");
+			onLost();
 			return;
 		}
+		if (isPrevShotSuccessful && prevShot) {
+			const neighbours = grid.getNeighbours(prevShot);
+			const filtered = neighbours.filter((cell) => !cell.getIsHit());
+			if (filtered.length > 0) {
+				availableCells = filtered;
+			}
+		}
 		const coordinates = generateRandomCoordinates(availableCells);
+		prevShot = coordinates;
 		setShots(coordinates);
 	};
 
@@ -95,7 +114,7 @@ const Board = ({
 
 	return (
 		<>
-			{grid.current.getGrid().map((row, rowIndex) => {
+			{grid.getGrid().map((row, rowIndex) => {
 				const numberOfDecks = row.map((cell) => cell.getShip()).filter(Boolean).length;
 				return (
 					<div className="flex flex-nowrap justify-center" key={rowIndex}>

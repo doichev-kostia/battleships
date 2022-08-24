@@ -11,6 +11,8 @@ import { gameKeys } from "data/queryKeys";
 import { gamerAbsolutePaths } from "app/constants/paths";
 import { PreviewBoard } from "../../components/preview-board/preview-board";
 import { SocketContext } from "../../utils/socket-provider";
+import { useAtom } from "jotai";
+import { gridSizeAtom } from "../../utils/atoms";
 
 const Overlay = styled("div")`
 	position: relative;
@@ -32,10 +34,11 @@ const Overlay = styled("div")`
 `;
 
 const WaitingRoom = () => {
+	const [gridSize] = useAtom(gridSizeAtom);
 	const { socket } = useContext(SocketContext);
 	const [hasOpponentJoined, setHasOpponentJoined] = useState(false);
 	const { gameId } = useParams<"gameId">();
-	const grid = useRef(new Grid());
+	const grid = useRef(new Grid(gridSize));
 
 	const tokenData = useTokenData();
 	const navigate = useNavigate();
@@ -84,7 +87,7 @@ const WaitingRoom = () => {
 	})();
 
 	const handleComputerGame = () => {
-		const computerGrid = new Grid();
+		const computerGrid = new Grid(gridSize);
 		computerGrid.generateShips();
 		const body = {
 			gameId: game.id,
@@ -120,10 +123,10 @@ const WaitingRoom = () => {
 				</MuiGrid>
 				<MuiGrid item xs={12} md={6}>
 					{hasOpponentJoined ? (
-						<PreviewBoard grid={new Grid()} />
+						<PreviewBoard grid={new Grid(gridSize)} />
 					) : (
 						<Overlay>
-							<PreviewBoard grid={new Grid()} />
+							<PreviewBoard grid={new Grid(gridSize)} />
 						</Overlay>
 					)}
 				</MuiGrid>

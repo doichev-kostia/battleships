@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import Ship from "../../utils/game/ship";
 import create from "zustand";
 import Board from "../../components/board/board";
+import { useAtom } from "jotai";
+import { gridSizeAtom } from "../../utils/atoms";
 
 const STORAGE_KEYS = {
 	playerShots: "playerShots",
@@ -43,6 +45,7 @@ const useComputerShotsStore = create<ShotsStore>((set) => ({
 }));
 const renders = 0;
 const GamePage = () => {
+	const [, setGridSize] = useAtom(gridSizeAtom);
 	const { gameId } = useParams<"gameId">();
 	const [isPlayerTurn, setPlayerTurn] = useState(true);
 	const playerShots = usePlayerShotsStore((state) => state.shots);
@@ -55,6 +58,10 @@ const GamePage = () => {
 	const navigate = useNavigate();
 	const { data: game, isLoading: isGameLoading } = useFetchGame(gameId || "", {
 		enabled: !!gameId,
+		onSuccess: (game) => {
+			const isSmall = game.players.some((player) => player.ships.length < 5);
+			isSmall ? setGridSize("small") : setGridSize("standard");
+		},
 	});
 
 	const toggleTurn = () => {
@@ -70,21 +77,19 @@ const GamePage = () => {
 		return;
 	}
 
-	const handleOpponentLose = () => {
+	const handleOpponentLost = () => {
 		toast.success("You win!");
 		sessionStorage.removeItem(STORAGE_KEYS.playerShots);
 		sessionStorage.removeItem(STORAGE_KEYS.opponentShots);
-		sessionStorage.removeItem(STORAGE_KEYS.isPlayerTurn);
 		setTimeout(() => {
 			navigate("/");
 		}, 1500);
 	};
 
-	const handlePlayerLose = () => {
+	const handlePlayerLost = () => {
 		toast.error("You lose!");
 		sessionStorage.removeItem(STORAGE_KEYS.playerShots);
 		sessionStorage.removeItem(STORAGE_KEYS.opponentShots);
-		sessionStorage.removeItem(STORAGE_KEYS.isPlayerTurn);
 		setTimeout(() => {
 			navigate("/");
 		}, 1500);
@@ -153,7 +158,6 @@ const GamePage = () => {
 		setter(currentShot);
 	};
 
-	console.log({ isPlayerTurn, playerShots, computerShots });
 	return (
 		<MuiGrid container className="mt-10 items-center justify-between">
 			<MuiGrid item xs={12} md={6} className="mb-10 md:mb-0" id="player">
@@ -163,6 +167,7 @@ const GamePage = () => {
 					</Typography>
 				</div>
 				<Board
+					onLost={handlePlayerLost}
 					isPrevShotSuccessful={isComputerShotSuccessful}
 					isTurn={!isPlayerTurn}
 					isOpponentComputer={true}
@@ -185,6 +190,7 @@ const GamePage = () => {
 					</Typography>
 				</div>
 				<Board
+					onLost={handleOpponentLost}
 					clickable={isPlayerTurn}
 					isTurn={isPlayerTurn}
 					opponentShots={playerShots}

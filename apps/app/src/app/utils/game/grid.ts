@@ -54,6 +54,10 @@ export class Grid {
 		return this.availableShips;
 	}
 
+	public getAvailableCells(): Cell[] {
+		return this.grid.flat(2).filter((cell) => !cell.getIsHit());
+	}
+
 	public fillWithShips(): void {
 		this.ships.forEach((ship) => {
 			const { xStart, yStart, xEnd, yEnd } = ship.getCoordinates();

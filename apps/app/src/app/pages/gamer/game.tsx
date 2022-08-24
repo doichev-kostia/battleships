@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Grid as MuiGrid, Typography } from "@mui/material";
 import { useFetchGame, useTokenData } from "data";
 import { useNavigate, useParams } from "react-router-dom";
@@ -41,7 +41,7 @@ const useComputerShotsStore = create<ShotsStore>((set) => ({
 			};
 		}),
 }));
-let renders = 0;
+const renders = 0;
 const GamePage = () => {
 	const { gameId } = useParams<"gameId">();
 	const [isPlayerTurn, setPlayerTurn] = useState(true);
@@ -51,17 +51,11 @@ const GamePage = () => {
 	const addComputerShot = useComputerShotsStore((state) => state.addShot);
 	const [isComputerShotSuccessful, setIsComputerShotSuccessful] = useState(false);
 
-	console.log({ renders: renders++ });
-
 	const tokenData = useTokenData();
 	const navigate = useNavigate();
-	const { data: game, isLoading: isGameLoading, refetch } = useFetchGame(gameId || "");
-
-	useEffect(() => {
-		if (gameId) {
-			refetch();
-		}
-	}, []);
+	const { data: game, isLoading: isGameLoading } = useFetchGame(gameId || "", {
+		enabled: !!gameId,
+	});
 
 	const toggleTurn = () => {
 		setPlayerTurn((prevState) => !prevState);

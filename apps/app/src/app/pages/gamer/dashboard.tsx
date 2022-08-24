@@ -1,22 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { Button, Container, Grid as MuiGrid, Typography } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
+import { Button, Container, Grid as MuiGrid, List, ListItem, Typography } from "@mui/material";
 import { Grid } from "app/utils/game/grid";
 import { useNavigate } from "react-router-dom";
 import { gamerAbsolutePaths, paths } from "app/constants/paths";
-import { useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
-import { GameRepresentation } from "@battleships/contracts";
+import { useFetchAvailableGames, useInitializeGame, useJoinGame, useTokenData } from "data/hooks";
+import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
 import { PreviewBoard } from "app/components/preview-board/preview-board";
+import { SocketContext } from "../../utils/socket-provider";
+import { useQueryClient } from "react-query";
+import { gameKeys } from "../../../data/queryKeys";
+import { Loader } from "../../components/loader";
 
 const DashboardPage = () => {
+	const { socket } = useContext(SocketContext);
 	const [grid] = useState(new Grid());
 	const [randomizeCounter, setRandomizeCounter] = useState(0);
 	const [isRandomDisabled, setIsRandomDisabled] = useState(false);
 
 	const navigate = useNavigate();
 	const tokenData = useTokenData();
+	const queryClient = useQueryClient();
 
 	const { mutate: initializeGame } = useInitializeGame();
 	const { mutate: joinGame } = useJoinGame();
+	const { data: availableGames, isLoading } = useFetchAvailableGames(tokenData?.role.id || "", {
+		enabled: !!tokenData?.role.id,
+	});
 
 	/**
 	 * @todo:
@@ -32,6 +41,13 @@ const DashboardPage = () => {
 	}
 
 	useEffect(() => {
+		socket.on(SOCKET_EVENTS.GAME_JOIN, () => {
+			queryClient.invalidateQueries(gameKeys.available);
+		});
+
+		socket.on(SOCKET_EVENTS.GAME_START, () => {
+			queryClient.invalidateQueries(gameKeys.available);
+		});
 		grid.generateShips();
 		setRandomizeCounter(randomizeCounter + 1);
 	}, []);
@@ -49,9 +65,28 @@ const DashboardPage = () => {
 				joinGame(body, {
 					onSuccess: () => {
 						const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", id);
+						socket.emit(SOCKET_EVENTS.GAME_INIT);
+						socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId: id });
 						navigate(path, { replace: true });
 					},
 				});
+			},
+		});
+	};
+
+	const handleJoin = (gameId: string) => {
+		const body = {
+			gameId,
+			body: {
+				userId: tokenData.userId,
+				ships: grid.getShips().map((ship) => ship.getCoordinates()),
+			},
+		};
+		joinGame(body, {
+			onSuccess: () => {
+				const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", gameId);
+				socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
+				navigate(path, { replace: true });
 			},
 		});
 	};
@@ -74,7 +109,37 @@ const DashboardPage = () => {
 				Dashboard
 			</Typography>
 			<MuiGrid container rowSpacing={2} columnSpacing={2}>
-				<MuiGrid item xs={12}>
+				<MuiGrid item xs={12} md={3}>
+					<Typography variant="h5">Available games</Typography>
+					<List>
+						{!isLoading && availableGames?.items ? (
+							availableGames.items.map((game) => {
+								const { players } = game;
+								const { user } = players[0].role;
+								return (
+									<ListItem key={game.id} className="flex items-center justify-between pl-0">
+										<div>
+											<Typography variant="body1">{user.username}</Typography>
+										</div>
+										<div>
+											<Button
+												onClick={() => handleJoin(game.id)}
+												variant="contained"
+												color="primary"
+												className="no-underline"
+											>
+												Join
+											</Button>
+										</div>
+									</ListItem>
+								);
+							})
+						) : (
+							<Loader />
+						)}
+					</List>
+				</MuiGrid>
+				<MuiGrid item xs={12} md={9}>
 					<Typography variant="h5" className="mb-4 text-center">
 						Prepare your grid
 					</Typography>

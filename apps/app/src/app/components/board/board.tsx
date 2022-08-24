@@ -1,9 +1,11 @@
-import React from "react";
-import { GAME_CONFIG } from "app/constants/game-config";
+import React, { useRef } from "react";
 import Ship from "../../utils/game/ship";
 import { Typography } from "@mui/material";
 import { Coordinates } from "../../utils/types";
 import { getRandomInt } from "../../utils/helpers";
+import { Grid } from "../../utils/game/grid";
+import { Cell } from "../../utils/game/cell";
+import cx from "classnames";
 
 interface BoardProps {
 	ships: Ship[];
@@ -16,52 +18,11 @@ interface BoardProps {
 	isPrevShotSuccessful?: boolean;
 }
 
-let counter = 0;
-const queue: Coordinates[] = [];
-const generateRandomCoordinates = (successfulShot?: Coordinates) => {
-	console.log({ counter: counter++ });
-	// if (successfulShot) {
-	// 	queue = [
-	// 		{
-	// 			x: successfulShot.x - 1,
-	// 			y: successfulShot.y,
-	// 		},
-	// 		{
-	// 			x: successfulShot.x + 1,
-	// 			y: successfulShot.y,
-	// 		},
-	// 		{
-	// 			x: successfulShot.x,
-	// 			y: successfulShot.y - 1,
-	// 		},
-	// 		{
-	// 			x: successfulShot.x,
-	// 			y: successfulShot.y + 1,
-	// 		},
-	// 	];
-	// }
-	//
-	// if (queue.length) {
-	// 	return queue.pop() as Coordinates;
-	// }
-
-	const x = getRandomInt(0, GAME_CONFIG.size + 1);
-	const y = getRandomInt(0, GAME_CONFIG.size + 1);
-
-	return { x, y } as Coordinates;
+const generateRandomCoordinates = (availableCells: Cell[]) => {
+	const index = getRandomInt(0, availableCells.length);
+	const cell = availableCells[index];
+	return cell.getCoordinates();
 };
-
-const isValidShot = (coordinates: Coordinates, opponentShots: Coordinates[]) => {
-	const { x, y } = coordinates;
-	const isInRange = x >= 0 && x < GAME_CONFIG.size && y >= 0 && y < GAME_CONFIG.size;
-	if (!isInRange) {
-		return false;
-	}
-
-	return !opponentShots.some((c) => c.x === x && c.y === y);
-};
-
-let prevShot: Coordinates;
 
 const Board = ({
 	clickable = false,
@@ -73,12 +34,35 @@ const Board = ({
 	isPrevShotSuccessful = false,
 	isTurn,
 }: BoardProps): JSX.Element => {
+	const grid = useRef(new Grid());
+
+	grid.current.setShips(ships);
+	grid.current.getGrid().forEach((row) => {
+		row.forEach((cell) => {
+			const { x, y } = cell.getCoordinates();
+			ships.forEach((ship) => ship.isAt({ x, y }) && cell.setShip(ship));
+			const isHit = opponentShots.some((c) => c.x === x && c.y === y);
+			if (isHit) {
+				cell.hit();
+			}
+
+			if (cell.getShip()?.getIsKilled()) {
+				grid.current.killShip(cell.getShip());
+			}
+		});
+	});
+
+	if (grid.current.getShips().length > 0 && grid.current.getAvailableShips()?.length === 0) {
+		console.log("You lost!");
+		return <div>LOST</div>;
+	}
+
 	const processColumnDecks = () => {
-		const columns = [];
-		for (let i = 0; i < GAME_CONFIG.size; i++) {
+		const columns: number[] = [];
+		for (let i = 0; i < grid.current.getGrid().length; i++) {
 			let columnDecks = 0;
-			for (let j = 0; j < GAME_CONFIG.size; j++) {
-				columnDecks += Number(ships.some((ship) => ship.isAt({ x: i, y: j })));
+			for (let j = 0; j < grid.current.getGrid().length; j++) {
+				columnDecks += grid.current.getGrid()[j][i].getShip() ? 1 : 0;
 			}
 			columns.push(columnDecks);
 		}
@@ -96,13 +80,12 @@ const Board = ({
 	};
 
 	const makeComputerShot = () => {
-		let coordinates: Coordinates = generateRandomCoordinates(
-			isPrevShotSuccessful ? prevShot : undefined,
-		);
-		while (!isValidShot(coordinates, opponentShots)) {
-			coordinates = generateRandomCoordinates(isPrevShotSuccessful ? prevShot : undefined);
+		const availableCells = grid.current.getAvailableCells();
+		if (!availableCells) {
+			console.log("no available cells");
+			return;
 		}
-		prevShot = coordinates;
+		const coordinates = generateRandomCoordinates(availableCells);
 		setShots(coordinates);
 	};
 
@@ -110,56 +93,50 @@ const Board = ({
 		makeComputerShot();
 	}
 
-	return <button onClick={makeComputerShot}>click</button>;
+	return (
+		<>
+			{grid.current.getGrid().map((row, rowIndex) => {
+				const numberOfDecks = row.map((cell) => cell.getShip()).filter(Boolean).length;
+				return (
+					<div className="flex flex-nowrap justify-center" key={rowIndex}>
+						{row.map((cell) => {
+							const { x, y } = cell.getCoordinates();
+							const ship = cell.getShip();
+							const isHit = cell.getIsHit();
 
-	// return (
-	// 	<>
-	// 		{[...Array(GAME_CONFIG.size)].map((_, y) => {
-	// 			let numberOfDecks = 0;
-	// 			[...Array(GAME_CONFIG.size)].forEach((_, x) => {
-	// 				if (ships.some((ship) => ship.isAt({ x, y }))) {
-	// 					numberOfDecks++;
-	// 				}
-	// 			});
-	// 			return (
-	// 				<div className="flex flex-nowrap justify-center" key={y}>
-	// 					{[...Array(GAME_CONFIG.size)].fill(0).map((_, x) => {
-	// 						const ship = ships.find((ship) => ship.isAt({ x, y }));
-	// 						const isHit = opponentShots.some((c) => c.x === x && c.y === y);
-	//
-	// 						const color = (() => {
-	// 							if (ship?.getIsKilled()) return "bg-red-500";
-	// 							if (!!ship && isHit) return "bg-green-500";
-	// 							if (!!ship && !hide) return "bg-yellow-600";
-	// 							if (isHit) return "bg-blue-500";
-	// 						})();
-	//
-	// 						return (
-	// 							<div
-	// 								key={`${x}-${y}`}
-	// 								role="button"
-	// 								tabIndex={0}
-	// 								onClick={() => !isHit && clickable && handleClick({ x, y })}
-	// 								className={cx(color, "h-10 w-10 cursor-pointer border border-solid")}
-	// 							/>
-	// 						);
-	// 					})}
-	// 					<div className="flex h-10 w-10 items-center">
-	// 						<Typography variant="body2" className="flex-1 text-center">
-	// 							{numberOfDecks}
-	// 						</Typography>
-	// 					</div>
-	// 				</div>
-	// 			);
-	// 		})}
-	// 		<div className="flex items-center justify-center">
-	// 			<>
-	// 				{processColumnDecks()}
-	// 				<div className="h-10 w-10" />
-	// 			</>
-	// 		</div>
-	// 	</>
-	// );
+							const color = (() => {
+								if (ship?.getIsKilled()) return "bg-red-500";
+								if (!!ship && isHit) return "bg-green-500";
+								if (!!ship && !hide) return "bg-yellow-600";
+								if (isHit) return "bg-blue-500";
+							})();
+
+							return (
+								<div
+									key={`${x}-${y}`}
+									role="button"
+									tabIndex={0}
+									onClick={() => !isHit && clickable && handleClick({ x, y })}
+									className={cx(color, "h-10 w-10 cursor-pointer border border-solid")}
+								/>
+							);
+						})}
+						<div className="flex h-10 w-10 items-center">
+							<Typography variant="body2" className="flex-1 text-center">
+								{numberOfDecks}
+							</Typography>
+						</div>
+					</div>
+				);
+			})}
+			<div className="flex items-center justify-center">
+				<>
+					{processColumnDecks()}
+					<div className="h-10 w-10" />
+				</>
+			</div>
+		</>
+	);
 };
 
 export default Board;

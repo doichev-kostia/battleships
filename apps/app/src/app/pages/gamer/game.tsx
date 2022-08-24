@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Grid as MuiGrid, Typography } from "@mui/material";
-import { useFetchGame, useShoot, useTokenData } from "data";
+import { useFetchGame, useFinishGame, useShoot, useTokenData } from "data";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "app/components/loader";
 import { Coordinates } from "app/utils/types";
-import { toast } from "react-toastify";
 import Ship from "../../utils/game/ship";
 import Board from "../../components/board/board";
 import { useAtom } from "jotai";
 import { gridSizeAtom } from "../../utils/atoms";
+import { GAME_STATUS } from "@battleships/contracts";
+import { toast } from "react-toastify";
 
 const GamePage = () => {
 	const [, setGridSize] = useAtom(gridSizeAtom);
@@ -26,9 +27,12 @@ const GamePage = () => {
 		},
 	});
 
-	// const { mutate: finishGame } = useFinishGame();
+	const { mutate: finishGame } = useFinishGame();
 	const { mutate: shoot } = useShoot();
 
+	if (game && game.status === GAME_STATUS.FINISHED) {
+		navigate("/");
+	}
 	const toggleTurn = () => {
 		setPlayerTurn((prevState) => !prevState);
 	};
@@ -42,22 +46,20 @@ const GamePage = () => {
 		return;
 	}
 
-	const handleLoss = () => {
-		// finishGame(gameId, {
-		// 	onSuccess: () => {
-		navigate("/");
-		// },
-		// });
+	const handleLoss = (message: string, severity: "success" | "error") => {
+		toast[severity](message);
+		setTimeout(() => {
+			finishGame({ id: gameId });
+			navigate("/");
+		}, 1500);
 	};
 
 	const handleOpponentLost = () => {
-		toast.success("You win!");
-		handleLoss();
+		handleLoss("You win", "success");
 	};
 
 	const handlePlayerLost = () => {
-		toast.error("You lose!");
-		handleLoss();
+		handleLoss("You lost!", "error");
 	};
 
 	const player = game.players.find(

@@ -70,7 +70,7 @@ export const useStartGame = (options?: ProgressGameOptions) => {
 };
 
 export const useFinishGame = (options?: ProgressGameOptions) => {
-	return useMutation(gameKeys.finish, finishGame, options);
+	return useMutation(["finished"], ({ id }: { id: string }) => finishGame(id), options);
 };
 
 type UseShotOptions = Omit<

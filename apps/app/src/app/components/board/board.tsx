@@ -65,7 +65,6 @@ const Board = ({
 	});
 
 	if (grid.getShips().length > 0 && grid.getAvailableShips()?.length === 0) {
-		debugger;
 		onLost();
 		return <Typography>You lost!</Typography>;
 	}

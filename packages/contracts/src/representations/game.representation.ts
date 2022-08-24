@@ -1,5 +1,5 @@
 import { Exclude, Expose } from "class-transformer";
-import { IsEnum, IsUUID } from "class-validator";
+import { IsDate, IsEnum, IsUUID } from "class-validator";
 import { GAME_STATUS } from "../enums/game-status";
 import { Nested } from "../utils/nested.decorator";
 
@@ -10,6 +10,10 @@ export class GameRepresentation {
 	@Expose()
 	@IsUUID()
 	public id: string;
+
+	@Expose()
+	@IsDate()
+	public createdAt: Date;
 
 	@Expose()
 	@IsEnum(GAME_STATUS)

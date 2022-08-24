@@ -26,6 +26,12 @@ export class GameController {
 		return GameHandler.getFinishedGames(roleId);
 	}
 
+	// @Get("/finished/:roleId/download")
+	// @Authorized()
+	// public downloadFinishedGames(@Param("roleId") roleId: string) {
+	// 	return GameHandler.downloadFinishedGames(roleId);
+	// }
+
 	@Get("/:gameId")
 	@Authorized()
 	@Representer(GameRepresentation)

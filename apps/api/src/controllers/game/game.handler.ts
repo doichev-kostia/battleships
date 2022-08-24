@@ -55,6 +55,10 @@ export class GameHandler {
 		return [games, games.length];
 	};
 
+	// public downloadFinishedGames = async (roleId: string) => {
+	// 	const [games, count] = GameHandler.getFinishedGames(roleId);
+	// };
+
 	public static create = async () => {
 		const em = getEm();
 

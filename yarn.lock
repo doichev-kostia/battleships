@@ -275,7 +275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.18.9
   resolution: "@babel/runtime@npm:7.18.9"
   dependencies:
@@ -385,6 +385,7 @@ __metadata:
     "@emotion/styled": ^11.10.0
     "@mui/icons-material": ^5.8.4
     "@mui/material": ^5.10.0
+    "@mui/x-data-grid": ^5.15.3
     "@types/axios": ^0.14.0
     "@types/classnames": ^2.3.1
     "@types/js-cookie": ^3.0.2
@@ -1026,7 +1027,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.9.3":
+"@mui/utils@npm:^5.4.1, @mui/utils@npm:^5.9.3":
   version: 5.9.3
   resolution: "@mui/utils@npm:5.9.3"
   dependencies:
@@ -1038,6 +1039,24 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
   checksum: 745a9c5634a1b1104a64eb77341ed48dabf3afcc2bab6d67ce875d0fdd7c3ee5d115f0613a7782a8406b34e0e29e15c6293cac540711161ff9aba720b2478a60
+  languageName: node
+  linkType: hard
+
+"@mui/x-data-grid@npm:^5.15.3":
+  version: 5.15.3
+  resolution: "@mui/x-data-grid@npm:5.15.3"
+  dependencies:
+    "@babel/runtime": ^7.18.6
+    "@mui/utils": ^5.4.1
+    clsx: ^1.2.1
+    prop-types: ^15.8.1
+    reselect: ^4.1.6
+  peerDependencies:
+    "@mui/material": ^5.4.1
+    "@mui/system": ^5.4.1
+    react: ^17.0.2 || ^18.0.0
+    react-dom: ^17.0.2 || ^18.0.0
+  checksum: 85f902c75a6e15f7b25f19f59c78bfad597b68215eb9caa731cc858f4d4eae676d2c8060d5a0b6fd60ef818d05bd6fbcaba356f675040632c18ff96247e6b382
   languageName: node
   linkType: hard
 
@@ -7038,6 +7057,13 @@ __metadata:
   version: 2.0.0
   resolution: "require-main-filename@npm:2.0.0"
   checksum: e9e294695fea08b076457e9ddff854e81bffbe248ed34c1eec348b7abbd22a0d02e8d75506559e2265e96978f3c4720bd77a6dad84755de8162b357eb6c778c7
+  languageName: node
+  linkType: hard
+
+"reselect@npm:^4.1.6":
+  version: 4.1.6
+  resolution: "reselect@npm:4.1.6"
+  checksum: 3ea1058422904063ec93c8f4693fe33dcb2178bbf417ace8db5b2c797a5875cf357d9308d11ed3942ee22507dd34ecfbf1f3a21340a4f31c206cab1d36ceef31
   languageName: node
   linkType: hard
 

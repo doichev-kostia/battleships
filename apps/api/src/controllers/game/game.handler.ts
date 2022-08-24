@@ -32,6 +32,29 @@ export class GameHandler {
 		return [filtered, filtered.length];
 	};
 
+	public static getFinishedGames = async (roleId: string): Promise<[Game[], number]> => {
+		const em = getEm();
+
+		const games = await em.find(
+			Game,
+			{
+				status: GAME_STATUS.FINISHED,
+				players: {
+					$and: [
+						{
+							role: {
+								$eq: roleId,
+							},
+						},
+					],
+				},
+			},
+			{ populate: ["players.role.user"] },
+		);
+
+		return [games, games.length];
+	};
+
 	public static create = async () => {
 		const em = getEm();
 

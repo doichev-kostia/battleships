@@ -30,5 +30,6 @@ export const gameKeys = (() => {
 		finish: `${base}/finish`,
 		shoot: `${base}/shoot`,
 		available: `${base}/available`,
+		finished: `${base}/finished`,
 	};
 })();

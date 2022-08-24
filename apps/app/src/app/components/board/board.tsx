@@ -39,7 +39,7 @@ const Board = ({
 	isPrevShotSuccessful = false,
 	isTurn,
 	onLost,
-}: BoardProps): React.ReactNode => {
+}: BoardProps): JSX.Element => {
 	const [gridSize] = useAtom(gridSizeAtom);
 	const [grid, setGrid] = useState(new Grid(gridSize));
 
@@ -65,7 +65,9 @@ const Board = ({
 	});
 
 	if (grid.getShips().length > 0 && grid.getAvailableShips()?.length === 0) {
+		debugger;
 		onLost();
+		return <Typography>You lost!</Typography>;
 	}
 
 	const processColumnDecks = () => {

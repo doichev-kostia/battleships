@@ -70,6 +70,12 @@ describe("Handler test", () => {
 			expect(playerShots.length).to.be.greaterThan(0);
 		});
 
+		it("should get role's finished games", async () => {
+			const roleId = createSimpleUUID(9);
+			const game = await GameHandler.getFinishedGames(roleId);
+			expect(game.length).to.be.greaterThan(0);
+		});
+
 		after(() => base.after());
 		afterEach(() => base.afterEach());
 	});

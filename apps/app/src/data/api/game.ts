@@ -6,8 +6,12 @@ export const createGame = () => {
 	return api.post<GameRepresentation>("/games");
 };
 
-export const getAvailableGames = (roleId: string) => {
+export const fetchAvailableGames = (roleId: string) => {
 	return api.get<ListRepresentation<GameRepresentation>>(`/games/available/${roleId}`);
+};
+
+export const fetchFinishedGames = (roleId: string) => {
+	return api.get<ListRepresentation<GameRepresentation>>(`/games/finished/${roleId}`);
 };
 
 export const fetchGame = (id: string) => {
@@ -25,6 +29,10 @@ export const joinGame = ({ gameId, body }: JoinGameArgs) => {
 
 export const startGame = (id: string) => {
 	return api.patch<GameRepresentation>(`/games/${id}/start`);
+};
+
+export const finishGame = (id: string) => {
+	return api.patch<GameRepresentation>(`/games/${id}/finish`);
 };
 
 export interface RegisterShotArgs {

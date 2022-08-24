@@ -8,8 +8,10 @@ import {
 import { gameKeys } from "data/queryKeys";
 import {
 	createGame,
+	fetchAvailableGames,
+	fetchFinishedGames,
 	fetchGame,
-	getAvailableGames,
+	finishGame,
 	joinGame,
 	JoinGameArgs,
 	registerShot,
@@ -28,13 +30,17 @@ export const useInitializeGame = (options?: UseInitializeGameOptions) => {
 	return useMutation<GameRepresentation, APIError, null>(gameKeys.create, createGame, options);
 };
 
-type UseFetchAvailableGamesOptions = Omit<
+type UseFetchGamesOptions = Omit<
 	UseQueryOptions<ListRepresentation<GameRepresentation>, APIError>,
 	"queryFn" | "queryKey"
 >;
 
-export const useFetchAvailableGames = (roleId: string, options?: UseFetchAvailableGamesOptions) => {
-	return useQuery(gameKeys.available, () => getAvailableGames(roleId), options);
+export const useFetchAvailableGames = (roleId: string, options?: UseFetchGamesOptions) => {
+	return useQuery(gameKeys.available, () => fetchAvailableGames(roleId), options);
+};
+
+export const useFetchFinishedGames = (roleId: string, options?: UseFetchGamesOptions) => {
+	return useQuery(gameKeys.finished, () => fetchFinishedGames(roleId), options);
 };
 
 type UseFetchGameOptions = Omit<
@@ -55,12 +61,16 @@ export const useJoinGame = (options?: UseJoinGameOptions) => {
 	return useMutation(gameKeys.join, joinGame, options);
 };
 
-type UseStartGameOptions = Omit<
+type ProgressGameOptions = Omit<
 	UseMutationOptions<GameRepresentation, APIError, string>,
 	"mutationFn" | "mutationKey"
 >;
-export const useStartGame = (options?: UseStartGameOptions) => {
+export const useStartGame = (options?: ProgressGameOptions) => {
 	return useMutation(gameKeys.start, startGame, options);
+};
+
+export const useFinishGame = (options?: ProgressGameOptions) => {
+	return useMutation(gameKeys.finish, finishGame, options);
 };
 
 type UseShotOptions = Omit<

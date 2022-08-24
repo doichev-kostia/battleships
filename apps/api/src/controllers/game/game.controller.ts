@@ -19,6 +19,13 @@ export class GameController {
 		return GameHandler.getAvailableGames(roleId);
 	}
 
+	@Get("/finished/:roleId")
+	@Authorized()
+	@ListRepresenter(GameRepresentation)
+	public getFinishedGames(@Param("roleId") roleId: string) {
+		return GameHandler.getFinishedGames(roleId);
+	}
+
 	@Get("/:gameId")
 	@Authorized()
 	@Representer(GameRepresentation)

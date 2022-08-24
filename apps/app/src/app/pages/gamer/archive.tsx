@@ -58,7 +58,7 @@ const ArchivePage = () => {
 			username: usernames[0],
 			username2: usernames[1],
 			createdAt: createdAt,
-			winner: winner?.user.username || "Computer",
+			winner: winner?.role?.user.username || "Computer",
 		};
 	});
 

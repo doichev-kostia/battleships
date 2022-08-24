@@ -33,3 +33,10 @@ export const gameKeys = (() => {
 		finished: `${base}/finished`,
 	};
 })();
+
+export const playerKeys = (() => {
+	const base = "player";
+	return {
+		update: `${base}/update`,
+	};
+})();

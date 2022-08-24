@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Grid as MuiGrid, Typography } from "@mui/material";
-import { useFetchGame, useFinishGame, useShoot, useTokenData } from "data";
+import { useFetchGame, useFinishGame, useSaveWinner, useShoot, useTokenData } from "data";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "app/components/loader";
 import { Coordinates } from "app/utils/types";
@@ -29,6 +29,7 @@ const GamePage = () => {
 
 	const { mutate: finishGame } = useFinishGame();
 	const { mutate: shoot } = useShoot();
+	const { mutate: saveWinner } = useSaveWinner();
 
 	if (game && game.status === GAME_STATUS.FINISHED) {
 		navigate("/");
@@ -46,20 +47,13 @@ const GamePage = () => {
 		return;
 	}
 
-	const handleLoss = (message: string, severity: "success" | "error") => {
+	const handleLost = (opponentId: string, message: string, severity: "success" | "error") => {
 		toast[severity](message);
 		setTimeout(() => {
+			saveWinner(opponentId);
 			finishGame({ id: gameId });
 			navigate("/");
 		}, 1500);
-	};
-
-	const handleOpponentLost = () => {
-		handleLoss("You win", "success");
-	};
-
-	const handlePlayerLost = () => {
-		handleLoss("You lost!", "error");
 	};
 
 	const player = game.players.find(
@@ -77,6 +71,14 @@ const GamePage = () => {
 		window.location.reload();
 		return;
 	}
+
+	const handleOpponentLost = () => {
+		handleLost(player.id, "You win", "success");
+	};
+
+	const handlePlayerLost = () => {
+		handleLost(opponent.id, "You lost!", "error");
+	};
 
 	const playerShips = player.ships.map(({ xStart, yStart, xEnd, yEnd, id }) => {
 		const ship = new Ship(

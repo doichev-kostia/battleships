@@ -16,6 +16,7 @@ const socket = io(import.meta.env.VITE_SOCKET_URL);
 export const SocketProvider = ({ children }: SocketProviderProps) => {
 	useEffect(() => {
 		return () => {
+			console.log("a");
 			socket.disconnect();
 		};
 	}, []);

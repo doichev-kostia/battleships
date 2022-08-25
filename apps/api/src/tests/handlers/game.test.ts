@@ -76,6 +76,13 @@ describe("Handler test", () => {
 			expect(game.length).to.be.greaterThan(0);
 		});
 
+		it("should export finished games to a file", async () => {
+			const roleId = createSimpleUUID(9);
+			const { buffer } = await GameHandler.downloadFinishedGames(roleId);
+			const data = JSON.parse(buffer.toString());
+			expect(data).to.be.an("array");
+		});
+
 		after(() => base.after());
 		afterEach(() => base.afterEach());
 	});

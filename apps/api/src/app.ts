@@ -47,7 +47,9 @@ export class App {
 	}
 
 	public listen() {
-		this.socketServer.listen(this.socketPort);
+		this.socketServer.listen(this.socketPort, () => {
+			console.info(`Websockets are available at port:${this.socketPort}`);
+		});
 		this.host.listen(this.port, () => {
 			console.info(`=================================`);
 			console.info(`======= ENV: ${process.env.NODE_ENV} ========`);

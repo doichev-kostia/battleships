@@ -11,24 +11,26 @@ export class SocketHandler {
 
 	private initializeListeners() {
 		this.io.on(SOCKET_EVENTS.CONNECT, this.connect.bind(this));
-		this.io.on(SOCKET_EVENTS.GAME_INIT, this.gameInit.bind(this));
-		this.io.on(SOCKET_EVENTS.GAME_JOIN, this.gameJoin.bind(this));
 	}
 
 	public connect(socket: socketIo.Socket) {
 		console.log("Client connected");
+
+		socket.on(SOCKET_EVENTS.GAME_INIT, () => this.gameInit(socket));
+		socket.on(SOCKET_EVENTS.GAME_JOIN, (args) => this.gameJoin(socket, args));
+
 		socket.on(SOCKET_EVENTS.DISCONNECT, () => {
 			console.log("Client disconnected");
 		});
 	}
 
-	public gameInit = (socket: socketIo.Server) => {
+	public gameInit = (socket: socketIo.Socket) => {
 		socket.emit(SOCKET_EVENTS.GAME_INIT);
 	};
 
-	public gameJoin = (socket: socketIo.Server, { gameId }: { gameId: string }) => {
+	public gameJoin = (socket: socketIo.Socket, { gameId }: { gameId: string }) => {
 		console.log(`Client joined game ${gameId}`);
-		socket.socketsJoin(gameId);
+		socket.join(gameId);
 		socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
 	};
 }

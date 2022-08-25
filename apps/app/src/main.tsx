@@ -15,6 +15,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { SocketProvider } from "app/utils/socket-provider";
 import { ToastContainer } from "react-toastify";
+import ErrorBoundary from "./app/components/error-boundary/error-boundary";
 
 const rootElement = document.getElementById("root") || document.body;
 // Create a client
@@ -29,7 +30,9 @@ const Main = () => {
 						<StyledEngineProvider injectFirst>
 							<Suspense fallback={<Loader />}>
 								<DndProvider backend={HTML5Backend}>
-									<Router />
+									<ErrorBoundary>
+										<Router />
+									</ErrorBoundary>
 								</DndProvider>
 								<ToastContainer />
 							</Suspense>

@@ -168,7 +168,7 @@ const GamePage = () => {
 					clickable={isPlayerTurn}
 					isTurn={isPlayerTurn}
 					opponentShots={player.shots}
-					// hide
+					hide
 					ships={opponentShips}
 					setShots={(c) =>
 						setShots({

@@ -8,8 +8,9 @@ This turborepo uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package ma
 
 ### Apps and Packages
 
-- `server`
-- `client`
+- `api`
+- `app`
+- `contracts`
 
 ### Utilities
 
@@ -28,17 +29,25 @@ This repository is used in the `npx create-turbo` command, and selected when cho
 To build all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-yarn run build
+yarn run build:clean
 ```
 
 ### Develop
 
-To develop all apps and packages, run the following command:
-
 ```
-cd my-turborepo
-yarn run dev
+yarn workspace @battleships/api run dev
+yarn workspace @battleships/api run watch
+yarn workspace @battleships/app run dev
+```
+
+To build contracts
+```shell
+yarn workspace @battleships/contracts run build:clean
+```
+
+To run docker compose
+```shell
+cd apps/api && docker-compose up -d
 ```
 
 ### Remote Caching

@@ -3,7 +3,7 @@ import Ship, { Position as ShipPosition } from "./ship";
 import { Grid } from "./grid";
 import { Coordinates } from "../types";
 
-type Position = {
+type ShipGeneratorPosition = {
 	isHorizontal: boolean;
 	coordinates: Coordinates;
 };
@@ -42,7 +42,7 @@ export class ShipGenerator {
 		}, []);
 
 		allShips.forEach((ship) => {
-			let position: Position;
+			let position: ShipGeneratorPosition;
 			do {
 				position = this.generatePosition();
 				if (this.counter > 5000) {
@@ -94,10 +94,10 @@ export class ShipGenerator {
 		return {
 			isHorizontal,
 			coordinates,
-		} as Position;
+		} as ShipGeneratorPosition;
 	}
 
-	private isValidPosition(position: Position, shipSize: number) {
+	private isValidPosition(position: ShipGeneratorPosition, shipSize: number) {
 		const cells = this.grid.getGrid();
 
 		const { isHorizontal, coordinates } = position;

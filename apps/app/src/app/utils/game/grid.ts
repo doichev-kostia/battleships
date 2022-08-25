@@ -18,17 +18,6 @@ export class Grid {
 
 	public getSize = () => this.size;
 
-	private initializeGrid(): void {
-		this.grid = [];
-		const { size } = GAME_CONFIG[this.size];
-		for (let row = 0; row < size; row++) {
-			this.grid[row] = [];
-			for (let col = 0; col < size; col++) {
-				this.grid[row][col] = new Cell(col, row);
-			}
-		}
-	}
-
 	public generateShips(): void {
 		// To prevent some caching issues, we need to generate new ships every time
 		this.ships = [];
@@ -89,5 +78,15 @@ export class Grid {
 				}
 			}
 		});
+	}
+	private initializeGrid(): void {
+		this.grid = [];
+		const { size } = GAME_CONFIG[this.size];
+		for (let row = 0; row < size; row++) {
+			this.grid[row] = [];
+			for (let col = 0; col < size; col++) {
+				this.grid[row][col] = new Cell(col, row);
+			}
+		}
 	}
 }

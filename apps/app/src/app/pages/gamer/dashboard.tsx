@@ -66,7 +66,6 @@ const DashboardPage = () => {
 
 	useEffect(() => {
 		socket.on(SOCKET_EVENTS.GAME_JOIN, () => {
-			debugger;
 			queryClient.invalidateQueries(gameKeys.available);
 		});
 

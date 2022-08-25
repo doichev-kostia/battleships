@@ -49,3 +49,7 @@ export interface RegisterShotArgs {
 export const registerShot = ({ gameId, body }: RegisterShotArgs) => {
 	return api.patch<GameRepresentation>(`/games/${gameId}/shoot`, body);
 };
+
+export const deleteGame = (id: string) => {
+	return api.delete<null>(`/games/${id}`);
+};

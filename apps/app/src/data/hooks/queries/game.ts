@@ -8,6 +8,7 @@ import {
 import { gameKeys } from "data/queryKeys";
 import {
 	createGame,
+	deleteGame,
 	exportFinishedGames,
 	fetchAvailableGames,
 	fetchFinishedGames,
@@ -97,4 +98,13 @@ export const useShoot = (options?: UseShotOptions) => {
 			}
 		},
 	});
+};
+
+type UseDeleteGameOptions = Omit<
+	UseMutationOptions<null, APIError, string>,
+	"mutationFn" | "mutationKey"
+>;
+
+export const useDeleteGame = (options?: UseDeleteGameOptions) => {
+	return useMutation(gameKeys.delete, deleteGame, options);
 };

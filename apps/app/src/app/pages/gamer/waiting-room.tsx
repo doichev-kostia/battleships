@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Grid } from "app/utils/game/grid";
 import { Button, Grid as MuiGrid, styled, Typography } from "@mui/material";
-import { useFetchGame, useJoinGame, useStartGame, useTokenData } from "data";
+import { useDeleteGame, useFetchGame, useJoinGame, useStartGame, useTokenData } from "data";
 import { Loader } from "app/components/loader";
 import Ship from "app/utils/game/ship";
 import { useQueryClient } from "react-query";
@@ -37,6 +37,7 @@ const WaitingRoom = () => {
 	const [gridSize] = useAtom(gridSizeAtom);
 	const { socket } = useContext(SocketContext);
 	const [hasOpponentJoined, setHasOpponentJoined] = useState(false);
+	const isComputerGame = useRef(false);
 	const { gameId } = useParams<"gameId">();
 	const grid = useRef(new Grid(gridSize));
 
@@ -49,6 +50,7 @@ const WaitingRoom = () => {
 
 	const { mutate: joinGame } = useJoinGame();
 	const { mutate: startGame } = useStartGame();
+	const { mutate: deleteGame } = useDeleteGame();
 	const queryClient = useQueryClient();
 
 	useEffect(() => {
@@ -58,6 +60,11 @@ const WaitingRoom = () => {
 				setHasOpponentJoined(true);
 			}
 		});
+		return () => {
+			if (!hasOpponentJoined && !isComputerGame.current && gameId) {
+				deleteGame(gameId);
+			}
+		};
 	}, []);
 
 	if (isLoading || !game) {
@@ -87,6 +94,7 @@ const WaitingRoom = () => {
 	})();
 
 	const handleComputerGame = () => {
+		isComputerGame.current = true;
 		const computerGrid = new Grid(gridSize);
 		computerGrid.generateShips();
 		const body = {

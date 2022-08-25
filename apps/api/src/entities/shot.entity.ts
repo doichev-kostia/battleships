@@ -11,6 +11,6 @@ export class Shot extends Base<Shot> {
 	@Property()
 	public y: number;
 
-	@ManyToOne("Player")
+	@ManyToOne("Player", { onDelete: "CASCADE" })
 	public player: Player;
 }

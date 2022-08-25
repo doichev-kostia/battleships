@@ -83,6 +83,12 @@ describe("Handler test", () => {
 			expect(data).to.be.an("array");
 		});
 
+		it("should delete a game", async () => {
+			const gameId = createSimpleUUID(0);
+			const game = await GameHandler.deleteGame(gameId);
+			expect(game).to.be.undefined;
+		});
+
 		after(() => base.after());
 		afterEach(() => base.afterEach());
 	});

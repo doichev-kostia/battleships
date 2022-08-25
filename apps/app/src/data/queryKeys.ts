@@ -32,6 +32,7 @@ export const gameKeys = (() => {
 		available: `${base}/available`,
 		finished: `${base}/finished`,
 		exportFinished: `${base}/finished/export`,
+		delete: `${base}/delete`,
 	};
 })();
 

@@ -14,7 +14,7 @@ export class Player extends Base<Player> {
 	@Property({ type: "boolean", default: false })
 	public isWinner = false;
 
-	@ManyToOne("Game")
+	@ManyToOne("Game", { onDelete: "cascade" })
 	public game: Game;
 
 	@OneToMany("Shot", "player")

@@ -1,6 +1,15 @@
-import { Authorized, Get, JsonController, Param, Patch, Post, Res } from "routing-controllers";
+import {
+	Authorized,
+	Delete,
+	Get,
+	JsonController,
+	Param,
+	Patch,
+	Post,
+	Res,
+} from "routing-controllers";
 import { Body, ListRepresenter, Representer } from "@panenco/papi";
-import { GameRepresentation, JoinGameBody, ShotBody } from "@battleships/contracts";
+import { GameRepresentation, JoinGameBody, ShotBody, STATUS_CODE } from "@battleships/contracts";
 import { GameHandler } from "controllers/game/game.handler";
 import { Response } from "express";
 
@@ -69,5 +78,12 @@ export class GameController {
 	@Representer(GameRepresentation)
 	public shoot(@Param("gameId") gameId: string, @Body() body: ShotBody) {
 		return GameHandler.shoot(gameId, body);
+	}
+
+	@Delete("/:gameId")
+	@Authorized()
+	@Representer(null, STATUS_CODE.NO_CONTENT)
+	public deleteGame(@Param("gameId") gameId: string) {
+		return GameHandler.deleteGame(gameId);
 	}
 }

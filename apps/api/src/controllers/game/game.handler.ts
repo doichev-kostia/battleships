@@ -164,4 +164,11 @@ export class GameHandler {
 		await em.persistAndFlush([game, player, shot]);
 		return game;
 	};
+
+	public static deleteGame = async (gameId: string) => {
+		const em = getEm();
+
+		const game = await em.findOneOrFail(Game, gameId);
+		await em.removeAndFlush(game);
+	};
 }

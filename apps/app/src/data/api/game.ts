@@ -14,6 +14,12 @@ export const fetchFinishedGames = (roleId: string) => {
 	return api.get<ListRepresentation<GameRepresentation>>(`/games/finished/${roleId}`);
 };
 
+export const exportFinishedGames = (roleId: string) => {
+	return api.get<Blob>(`/games/finished/${roleId}/download`, {
+		responseType: "blob",
+	});
+};
+
 export const fetchGame = (id: string) => {
 	return api.get<GameRepresentation>(`/games/${id}`);
 };

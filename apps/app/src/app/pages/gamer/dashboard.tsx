@@ -25,6 +25,7 @@ import { Loader } from "../../components/loader";
 import { GridSize } from "app/constants/game-config";
 import { useAtom } from "jotai";
 import { gridSizeAtom } from "app/utils/atoms";
+import { toast } from "react-toastify";
 
 const DashboardPage = () => {
 	const [gridSize, setGridSize] = useAtom(gridSizeAtom);
@@ -96,6 +97,10 @@ const DashboardPage = () => {
 	};
 
 	const handleJoin = (gameId: string) => {
+		if (gridSize === "small") {
+			toast.error("You can't join a game with a small grid size");
+			return;
+		}
 		const body = {
 			gameId,
 			body: {
@@ -108,6 +113,9 @@ const DashboardPage = () => {
 				const path = gamerAbsolutePaths.waitingRoom.replace(":gameId", gameId);
 				socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
 				navigate(path, { replace: true });
+			},
+			onError: (error) => {
+				toast.error(error.message);
 			},
 		});
 	};

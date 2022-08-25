@@ -8,6 +8,7 @@ import {
 import { gameKeys } from "data/queryKeys";
 import {
 	createGame,
+	exportFinishedGames,
 	fetchAvailableGames,
 	fetchFinishedGames,
 	fetchGame,
@@ -41,6 +42,13 @@ export const useFetchAvailableGames = (roleId: string, options?: UseFetchGamesOp
 
 export const useFetchFinishedGames = (roleId: string, options?: UseFetchGamesOptions) => {
 	return useQuery(gameKeys.finished, () => fetchFinishedGames(roleId), options);
+};
+
+export const useExportFinishedGames = (
+	roleId: string,
+	options?: Omit<UseQueryOptions<Blob, APIError>, "queryFn" | "queryKey">,
+) => {
+	return useQuery(gameKeys.exportFinished, () => exportFinishedGames(roleId), options);
 };
 
 type UseFetchGameOptions = Omit<

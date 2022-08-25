@@ -27,7 +27,8 @@ export class SocketHandler {
 	};
 
 	public gameJoin = (socket: socketIo.Server, { gameId }: { gameId: string }) => {
+		console.log(`Client joined game ${gameId}`);
 		socket.socketsJoin(gameId);
-		socket.emit(SOCKET_EVENTS.GAME_JOIN);
+		socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
 	};
 }

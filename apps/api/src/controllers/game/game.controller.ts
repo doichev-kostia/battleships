@@ -1,7 +1,8 @@
-import { Authorized, Get, JsonController, Param, Patch, Post } from "routing-controllers";
+import { Authorized, Get, JsonController, Param, Patch, Post, Res } from "routing-controllers";
 import { Body, ListRepresenter, Representer } from "@panenco/papi";
 import { GameRepresentation, JoinGameBody, ShotBody } from "@battleships/contracts";
 import { GameHandler } from "controllers/game/game.handler";
+import { Response } from "express";
 
 @JsonController("/games")
 export class GameController {
@@ -26,11 +27,14 @@ export class GameController {
 		return GameHandler.getFinishedGames(roleId);
 	}
 
-	// @Get("/finished/:roleId/download")
-	// @Authorized()
-	// public downloadFinishedGames(@Param("roleId") roleId: string) {
-	// 	return GameHandler.downloadFinishedGames(roleId);
-	// }
+	@Get("/finished/:roleId/download")
+	@Authorized()
+	public async downloadFinishedGames(@Param("roleId") roleId: string, @Res() res: Response) {
+		const { buffer, fileName } = await GameHandler.downloadFinishedGames(roleId);
+		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+		return buffer;
+	}
 
 	@Get("/:gameId")
 	@Authorized()

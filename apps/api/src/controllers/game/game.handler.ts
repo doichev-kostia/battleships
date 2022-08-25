@@ -1,10 +1,13 @@
 import { getEm } from "utils";
-import { GAME_STATUS, JoinGameBody, ShotBody } from "@battleships/contracts";
+import { GAME_STATUS, GameRepresentation, JoinGameBody, ShotBody } from "@battleships/contracts";
 import { Game } from "entities/game.entity";
 import { Player } from "entities/player.entity";
 import { User } from "entities/user.entity";
 import { Shot } from "entities/shot.entity";
 import { Ship } from "entities/ship.entity";
+import fs from "fs/promises";
+import { v4 } from "uuid";
+import { plainToInstance } from "class-transformer";
 
 export class GameHandler {
 	public static getAvailableGames = async (roleId): Promise<[Game[], number]> => {
@@ -55,9 +58,23 @@ export class GameHandler {
 		return [games, games.length];
 	};
 
-	// public downloadFinishedGames = async (roleId: string) => {
-	// 	const [games, count] = GameHandler.getFinishedGames(roleId);
-	// };
+	public static downloadFinishedGames = async (roleId: string) => {
+		const [games] = await GameHandler.getFinishedGames(roleId);
+		const objects = games.map((g) => g.toJSON());
+		const serializedGames = plainToInstance(GameRepresentation, objects, {
+			exposeUnsetFields: false,
+		});
+		const fileName = `${v4()}.json`;
+		const path = `/tmp/${fileName}`;
+		await fs.writeFile(path, JSON.stringify(serializedGames));
+
+		const buffer = await fs.readFile(path);
+
+		return {
+			buffer,
+			fileName,
+		};
+	};
 
 	public static create = async () => {
 		const em = getEm();

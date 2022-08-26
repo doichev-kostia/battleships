@@ -1,32 +1,23 @@
-# Turborepo starter
+# Battleships
 
-This is an official Yarn v1 starter turborepo.
-
-## What's inside?
-
-This turborepo uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package manager. It includes the following packages/apps:
+Web game for university + to try some fancy technology
 
 ### Apps and Packages
 
-- `api`
-- `app`
-- `contracts`
+- `api` - back-end
+- `app` - front-end
+- `contracts` - collection of validators and types that are shared across api and app
 
-### Utilities
-
-This turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-## Setup
-
-This repository is used in the `npx create-turbo` command, and selected when choosing which package manager you wish to use with your monorepo (Yarn).
+### Tech stack
+- TypeScript
+- React
+- Vite
+- Express
+- PostgreSQL
 
 ### Build
 
-To build all apps and packages, run the following command:
+To build api and contracts, run the following command:
 
 ```
 yarn run build:clean

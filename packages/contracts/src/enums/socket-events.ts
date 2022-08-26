@@ -7,4 +7,5 @@ export enum SOCKET_EVENTS {
 	GAME_UPDATE = "game_update",
 	GAME_INIT = "game_init",
 	GAME_JOIN = "game_join",
+	SHOT_FIRED = "shot_fired",
 }

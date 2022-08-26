@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Grid } from "app/utils/game/grid";
 import { Button, Grid as MuiGrid, styled, Typography } from "@mui/material";
@@ -6,7 +6,7 @@ import { useDeleteGame, useFetchGame, useJoinGame, useStartGame, useTokenData } 
 import { Loader } from "app/components/loader";
 import Ship from "app/utils/game/ship";
 import { useQueryClient } from "react-query";
-import { GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
+import { GAME_STATUS, GameRepresentation, SOCKET_EVENTS } from "@battleships/contracts";
 import { gameKeys } from "data/queryKeys";
 import { gamerAbsolutePaths } from "app/constants/paths";
 import { PreviewBoard } from "../../components/preview-board/preview-board";
@@ -36,7 +36,6 @@ const Overlay = styled("div")`
 const WaitingRoom = () => {
 	const [gridSize] = useAtom(gridSizeAtom);
 	const { socket } = useContext(SocketContext);
-	const [hasOpponentJoined, setHasOpponentJoined] = useState(false);
 	const isComputerGame = useRef(false);
 	const { gameId } = useParams<"gameId">();
 	const grid = useRef(new Grid(gridSize));
@@ -55,17 +54,34 @@ const WaitingRoom = () => {
 
 	useEffect(() => {
 		socket.on(SOCKET_EVENTS.GAME_JOIN, (data) => {
-			debugger;
 			if (data.gameId === gameId) {
-				setHasOpponentJoined(true);
+				queryClient.invalidateQueries(gameKeys.get(gameId as string));
 			}
 		});
 		return () => {
-			if (!hasOpponentJoined && !isComputerGame.current && gameId) {
+			if (gameId && game?.players.length === 1) {
 				deleteGame(gameId);
 			}
 		};
 	}, []);
+
+	useEffect(() => {
+		if (game && gameId && game.players.length === 2 && !isComputerGame.current) {
+			const path = gamerAbsolutePaths.game.replace(":gameId", game.id);
+			if (game.status === GAME_STATUS.PENDING) {
+				startGame(gameId, {
+					onSuccess: () => {
+						queryClient.invalidateQueries(gameKeys.get(game.id));
+						queryClient.invalidateQueries(gameKeys.available);
+						socket.emit(SOCKET_EVENTS.GAME_START, { gameId: game.id });
+						navigate(path, { replace: true });
+					},
+				});
+			} else if (game.status === GAME_STATUS.IN_PROGRESS) {
+				navigate(path, { replace: true });
+			}
+		}
+	}, [game]);
 
 	if (isLoading || !game) {
 		return <Loader />;
@@ -130,7 +146,7 @@ const WaitingRoom = () => {
 					<PreviewBoard grid={grid.current} />
 				</MuiGrid>
 				<MuiGrid item xs={12} md={6}>
-					{hasOpponentJoined ? (
+					{game.players.length === 2 ? (
 						<PreviewBoard grid={new Grid(gridSize)} />
 					) : (
 						<Overlay>

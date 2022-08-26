@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Grid as MuiGrid, Typography } from "@mui/material";
 import { useFetchGame, useFinishGame, useSaveWinner, useShoot, useTokenData } from "data";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,14 +8,19 @@ import Ship from "../../utils/game/ship";
 import Board from "../../components/board/board";
 import { useAtom } from "jotai";
 import { gridSizeAtom } from "../../utils/atoms";
-import { GAME_STATUS } from "@battleships/contracts";
+import { GAME_STATUS, SOCKET_EVENTS } from "@battleships/contracts";
 import { toast } from "react-toastify";
+import { SocketContext } from "app/utils/socket-provider";
+import { useQueryClient } from "react-query";
+import { gameKeys } from "../../../data/queryKeys";
 
 const GamePage = () => {
+	const { socket } = useContext(SocketContext);
 	const [, setGridSize] = useAtom(gridSizeAtom);
 	const { gameId } = useParams<"gameId">();
 	const [isPlayerTurn, setPlayerTurn] = useState(true);
 	const [isComputerShotSuccessful, setIsComputerShotSuccessful] = useState(false);
+	const isComputer = useRef(false);
 
 	const tokenData = useTokenData();
 	const navigate = useNavigate();
@@ -24,12 +29,26 @@ const GamePage = () => {
 		onSuccess: (game) => {
 			const isSmall = game.players.some((player) => player.ships.length < 5);
 			isSmall ? setGridSize("small") : setGridSize("standard");
+			isComputer.current = game.players.some((player) => player.role === null);
 		},
 	});
 
 	const { mutate: finishGame } = useFinishGame();
 	const { mutate: shoot } = useShoot();
 	const { mutate: saveWinner } = useSaveWinner();
+	const queryClient = useQueryClient();
+
+	useEffect(() => {
+		socket.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
+		socket.on(SOCKET_EVENTS.SHOT_FIRED, ({ isHit }) => {
+			if (!isHit) {
+				setPlayerTurn(true);
+			}
+			queryClient.invalidateQueries(gameKeys.get(gameId as string));
+		});
+	}, []);
+
+	console.log({ isPlayerTurn });
 
 	if (game && game.status === GAME_STATUS.FINISHED) {
 		navigate("/");
@@ -65,6 +84,8 @@ const GamePage = () => {
 		if (player?.role === null) {
 			return true;
 		}
+
+		return player?.role && player.role.id !== tokenData.role.id;
 	});
 
 	if (!player || !opponent) {
@@ -123,14 +144,21 @@ const GamePage = () => {
 		if (isHit && playerId === opponent.id) {
 			setIsComputerShotSuccessful(true);
 		}
-		shoot({
-			gameId,
-			body: {
-				playerId,
-				x: currentShot.x,
-				y: currentShot.y,
+		shoot(
+			{
+				gameId,
+				body: {
+					playerId,
+					x: currentShot.x,
+					y: currentShot.y,
+				},
 			},
-		});
+			{
+				onSuccess: () => {
+					socket.emit(SOCKET_EVENTS.SHOT_FIRED, { isHit });
+				},
+			},
+		);
 	};
 
 	return (
@@ -145,7 +173,7 @@ const GamePage = () => {
 					onLost={handlePlayerLost}
 					isPrevShotSuccessful={isComputerShotSuccessful}
 					isTurn={!isPlayerTurn}
-					isOpponentComputer={true}
+					isOpponentComputer={isComputer.current}
 					opponentShots={opponent.shots}
 					ships={playerShips}
 					setShots={(c) =>

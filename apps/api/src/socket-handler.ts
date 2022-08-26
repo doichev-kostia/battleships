@@ -31,6 +31,9 @@ export class SocketHandler {
 	public gameJoin = (socket: socketIo.Socket, { gameId }: { gameId: string }) => {
 		console.log(`Client joined game ${gameId}`);
 		socket.join(gameId);
+		socket.on(SOCKET_EVENTS.SHOT_FIRED, ({ isHit }) => {
+			socket.broadcast.to(gameId).emit(SOCKET_EVENTS.SHOT_FIRED, { isHit });
+		});
 		socket.broadcast.emit(SOCKET_EVENTS.GAME_JOIN, { gameId });
 	};
 }

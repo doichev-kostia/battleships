@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { paths } from "app/constants/paths";
 
 export type SignUpValues = {
-	[key in keyof SignUpValidationSchema]: any;
+	[key in keyof SignUpValidationSchema]: SignUpValidationSchema[key];
 };
 
 const initialValues: SignUpValues = {
@@ -17,7 +17,7 @@ const initialValues: SignUpValues = {
 	lastName: "",
 	email: "",
 	username: "",
-	phoneNumber: null,
+	phoneNumber: undefined,
 	password: "",
 	confirmPassword: "",
 };
@@ -54,7 +54,7 @@ const SignUpPage = () => {
 			<div className="mt-10">
 				<Typography className="text-center" variant="body2">
 					Already have an account?{" "}
-					<Link className="no-underline text-blue-400" to={`/${paths.signIn}`}>
+					<Link className="text-blue-400 no-underline" to={`/${paths.signIn}`}>
 						Sign In
 					</Link>
 				</Typography>
